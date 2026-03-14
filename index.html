@@ -154,6 +154,42 @@ button:hover {
 #debt .taskBox {
     border-left: 5px solid var(--primary);
 }
+
+/* --- PHẦN CSS THÊM MỚI CHO TÍNH NĂNG NHÓM & NHẮC NHỞ --- */
+.social-btn {
+    flex: 1;
+    padding: 12px;
+    text-decoration: none;
+    border-radius: 15px;
+    font-weight: bold;
+    text-align: center;
+    color: white;
+    transition: 0.3s;
+}
+.social-btn:hover {
+    transform: translateY(-3px);
+    filter: brightness(1.1);
+}
+.btn-tele { background: #0088cc; }
+.btn-zalo { background: #0068ff; }
+
+.alert-box {
+    background: rgba(255, 107, 107, 0.2);
+    border: 2px solid #ff6b6b;
+    color: #ff6b6b;
+    padding: 15px;
+    border-radius: 15px;
+    margin-bottom: 15px;
+    font-weight: bold;
+    text-align: center;
+    animation: shake 0.5s;
+}
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    50% { transform: translateX(5px); }
+    75% { transform: translateX(-5px); }
+}
 </style>
 
 </head>
@@ -174,6 +210,14 @@ button:hover {
 </div>
 
 <div id="app" style="display:none">
+
+    <div class="card">
+        <h3><span style="font-size:24px">📱</span> Nhóm theo dõi hàng ngày</h3>
+        <div style="display: flex; gap: 15px;">
+            <a href="https://t.me/+yYkaTgpWbtg3OTI1" target="_blank" class="social-btn btn-tele">Nhóm Telegram</a>
+            <a href="https://zalo.me/g/mmkc4nxkya5sumqwryjm" target="_blank" class="social-btn btn-zalo">Nhóm Zalo</a>
+        </div>
+    </div>
 
     <div class="card">
         <h3><span style="font-size:24px">📅</span> Nhiệm vụ của bạn</h3>
@@ -224,7 +268,7 @@ if (!firebase.apps.length) {
 const db = firebase.firestore();
 
 const TOKEN="8701701011:AAHbo0avSZXuCX3hGY0NdezE_Ef51GZRE-c";
-const CHAT_ID="-5237126120";
+const CHAT_ID="-5111756628";
 
 const users = ["Chi", "Kiệt", "Hùng"];
 let user = "";
@@ -234,8 +278,12 @@ let globalTasks = [];
 let globalBills = [];
 let globalPayments = [];
 
+// Biến cờ để kiểm soát việc thông báo nhắc nhở chỉ xuất hiện 1 lần khi mới vào
+let hasReminded = false;
+
 function login(name){
     user = name;
+    hasReminded = false; // Reset cờ nhắc nhở khi đăng nhập người khác
     document.getElementById("app").style.display = "block";
     // Hiển thị tên người mua tự động
     document.getElementById("buyerInfo").innerText = ` Ghi nhận hóa đơn cho: ${user} 💖`;
@@ -296,7 +344,21 @@ function renderTasks(){
             </div>
         `;
     } else {
+        // PHẦN THÊM MỚI: Bật thông báo Alert và Bắn Telegram nhắc nhở
+        if (!hasReminded) {
+            setTimeout(() => {
+                alert(`📢 Nhắc nhở: ${user} ơi, còn nhiệm vụ chưa làm kìa, nhớ làm nhé!`);
+                // Gọi hàm bắn thông báo lên Telegram
+                sendTelegramReminder(user, job);
+            }, 300);
+            hasReminded = true;
+        }
+
+        // Khung cảnh báo màu đỏ rung rung trên giao diện
         document.getElementById("tasks").innerHTML = `
+            <div class="alert-box">
+                ⚠️ ${user} còn nhiệm vụ chưa làm kìa, nhớ làm nhé! Đừng lười...
+            </div>
             <div class="taskBox">
                 <div>Việc của bé là: <b style="color:var(--primary)">${job}</b></div>
                 <input class="taskCheck" type="checkbox" onclick="doneTask('${job}')">
@@ -452,6 +514,12 @@ function sendBillTelegram(food, price, buyer, share){
 
 function sendTelegramPayment(from, to, amount) {
     let text = `🤖 <b>[HỆ THỐNG TỰ ĐỘNG]</b>\n\n💸 <b>XÁC NHẬN THANH TOÁN:</b>\n👤 Người chuyển: <b>${from}</b>\n🎯 Người nhận: <b>${to}</b>\n💰 Số tiền: <code>${amount.toLocaleString('vi-VN')}đ</code>\n\n✅ <i>Nợ đã được cấn trừ trên hệ thống!</i>`;
+    fetch(`https://api.telegram.org/bot${TOKEN}/sendMessage`,{ method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({chat_id: CHAT_ID, text: text, parse_mode: "HTML"}) });
+}
+
+// PHẦN THÊM MỚI: Bắn tin nhắn vào Telegram để nhắc nhở khi vào web mà chưa làm nhiệm vụ
+function sendTelegramReminder(name, job) {
+    let text = `📢 <b>[NHẮC NHỞ NHIỆM VỤ]</b>\n\n⚠️ <b>${name}</b> ơi, hôm nay bé có nhiệm vụ: <b>${job}</b> chưa làm kìa!\n👉 <i>Vào web hoàn thành ngay nhé!</i>`;
     fetch(`https://api.telegram.org/bot${TOKEN}/sendMessage`,{ method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({chat_id: CHAT_ID, text: text, parse_mode: "HTML"}) });
 }
 </script>
