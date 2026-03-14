@@ -7,107 +7,152 @@
 
 <title>Homestay Vân Canh</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 
 <style>
-body{
-    font-family: 'Inter', sans-serif;
-    margin:0;
-    padding:20px;
-    background:#0f172a;
-    color:white;
+:root {
+    --primary: #ff85a1; /* Pink cute */
+    --secondary: #7bdff2; /* Blue cute */
+    --bg: #1a1a2e;
+    --card-bg: #242444;
+    --accent: #b79ced; /* Purple cute */
 }
 
-.container{
-    max-width:1100px;
-    margin:auto;
+body {
+    font-family: 'Lexend', sans-serif;
+    margin: 0;
+    padding: 20px;
+    background: var(--bg);
+    color: #f0f0f0;
 }
 
-.title{
-    font-size:32px;
-    font-weight:700;
-    margin-bottom:20px;
-    text-align:center;
-    color:#00f2ff;
+.container {
+    max-width: 800px;
+    margin: auto;
 }
 
-.card{
-    background:#1e293b;
-    border-radius:14px;
-    padding:20px;
-    margin-bottom:20px;
+.title {
+    font-size: 36px;
+    font-weight: 700;
+    margin-bottom: 30px;
+    text-align: center;
+    color: var(--primary);
+    text-shadow: 0 0 15px rgba(255, 133, 161, 0.5);
 }
 
-.users{
-    display:flex;
-    gap:10px;
+.card {
+    background: var(--card-bg);
+    border-radius: 24px;
+    padding: 25px;
+    margin-bottom: 25px;
+    border: 2px solid rgba(255, 255, 255, 0.05);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
 }
 
-.user{
-    flex:1;
-    padding:12px;
-    background:#334155;
-    border-radius:8px;
-    text-align:center;
-    cursor:pointer;
-    transition: 0.2s;
+h3 {
+    margin-top: 0;
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--secondary);
+}
+
+.users {
+    display: flex;
+    gap: 15px;
+}
+
+.user {
+    flex: 1;
+    padding: 15px;
+    background: #2f2f5d;
+    border-radius: 18px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
     font-weight: 600;
+    border: 2px solid transparent;
 }
 
 .user:hover {
-    background: #475569;
+    transform: translateY(-5px);
+    background: var(--primary);
+    color: #fff;
+    box-shadow: 0 5px 15px rgba(255, 133, 161, 0.4);
 }
 
-.taskBox{
-    display:flex;
-    justify-content:space-between;
+.taskBox {
+    display: flex;
+    justify-content: space-between;
     align-items: center;
-    padding:15px;
-    background:#334155;
-    border-radius:8px;
-    margin-bottom:10px;
+    padding: 18px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 20px;
+    margin-bottom: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.03);
 }
 
-.taskCheck{
-    width:22px;
-    height:22px;
+.taskCheck {
+    width: 26px;
+    height: 26px;
     cursor: pointer;
+    accent-color: var(--primary);
 }
 
 input, select, button {
     width: 100%;
-    padding: 10px;
-    margin-bottom: 10px;
-    border-radius: 6px;
-    border: none;
+    padding: 14px;
+    margin-bottom: 15px;
+    border-radius: 15px;
+    border: 2px solid #3d3d6e;
     box-sizing: border-box;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Lexend', sans-serif;
+    background: #1a1a2e;
+    color: white;
+    outline: none;
+    transition: 0.3s;
+}
+
+input:focus {
+    border-color: var(--secondary);
 }
 
 button {
-    background: #00f2ff;
-    color: #0f172a;
-    font-weight: bold;
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    color: white;
+    font-weight: 700;
+    border: none;
     cursor: pointer;
-    transition: 0.2s;
+    font-size: 16px;
+    box-shadow: 0 4px 15px rgba(183, 156, 237, 0.3);
 }
 
 button:hover {
-    background: #00d4ff;
+    transform: scale(1.02);
+    filter: brightness(1.1);
 }
 
 .status-done {
     color: #40c463;
-    font-weight: bold;
+    font-weight: 600;
 }
 
 .status-pending {
-    color: #f85149;
-    font-weight: bold;
+    color: #ff6b6b;
+    font-weight: 600;
+}
+
+#billList .taskBox {
+    border-left: 5px solid var(--accent);
+}
+
+#debt .taskBox {
+    border-left: 5px solid var(--primary);
 }
 </style>
 
@@ -117,10 +162,10 @@ button:hover {
 
 <div class="container">
 
-<div class="title">🏠 Homestay Vân Canh</div>
+<div class="title">✨ Homestay Vân Canh ✨</div>
 
 <div class="card">
-    <h3>Chọn thành viên</h3>
+    <h3><span style="font-size:24px">🧸</span> Chọn thành viên</h3>
     <div class="users">
         <div class="user" onclick="login('Chi')">Chi</div>
         <div class="user" onclick="login('Kiệt')">Kiệt</div>
@@ -131,32 +176,30 @@ button:hover {
 <div id="app" style="display:none">
 
     <div class="card">
-        <h3>📅 Nhiệm vụ hôm nay của bạn</h3>
+        <h3><span style="font-size:24px">📅</span> Nhiệm vụ của bạn</h3>
         <div id="tasks">Đang tải dữ liệu...</div>
     </div>
 
     <div class="card">
-        <h3>✅ Trạng thái hôm nay</h3>
+        <h3><span style="font-size:24px">🌈</span> Trạng thái hôm nay</h3>
         <div id="dailyStatus">Đang tải dữ liệu...</div>
     </div>
 
-    <div class="card">
-        <h3>🛒 Mua đồ chung</h3>
-        <input id="foodName" placeholder="Tên món đồ / Dịch vụ">
-        <input id="foodPrice" type="number" placeholder="Tổng tiền (VNĐ)">
-        <select id="buyer">
-            <option>Chi</option>
-            <option>Kiệt</option>
-            <option>Hùng</option>
-        </select>
-        <button onclick="addBill()">Thêm hóa đơn</button>
+    <div class="card" style="background: linear-gradient(to bottom, #242444, #2a2a5a);">
+        <h3><span style="font-size:24px">🛒</span> Mua đồ chung</h3>
+        <div style="background: rgba(255,255,255,0.03); padding: 15px; border-radius: 20px;">
+            <input id="foodName" placeholder="Tên món đồ / Dịch vụ 🍰">
+            <input id="foodPrice" type="number" placeholder="Tổng tiền (VNĐ) 💸">
+            <p id="buyerInfo" style="font-size: 13px; margin: 0 0 10px 10px; color: var(--secondary); font-weight: 600;"></p>
+            <button onclick="addBill()">Thêm hóa đơn ngay! ✨</button>
+        </div>
         
-        <h4 style="margin-top: 20px;">Lịch sử hóa đơn</h4>
+        <h4 style="margin-top: 25px; color: var(--accent);">🕒 Lịch sử mua sắm</h4>
         <div id="billList"></div>
     </div>
 
     <div class="card">
-        <h3>💳 Bảng thanh toán nợ</h3>
+        <h3><span style="font-size:24px">💳</span> Bảng thanh toán nợ</h3>
         <div id="debt"></div>
     </div>
 
@@ -165,7 +208,7 @@ button:hover {
 </div>
 
 <script>
-/* FIREBASE CONFIG */
+/* PHẦN LOGIC FIREBASE & CONFIG GIỮ NGUYÊN */
 const firebaseConfig={
     apiKey:"AIzaSyCAH5iHPMiJ8DzAK_CvzlKOlpMlSzGJgLs",
     authDomain:"firebawweb.firebaseapp.com",
@@ -180,33 +223,27 @@ if (!firebase.apps.length) {
 }
 const db = firebase.firestore();
 
-/* TELEGRAM CONFIG */
 const TOKEN="8701701011:AAHbo0avSZXuCX3hGY0NdezE_Ef51GZRE-c";
 const CHAT_ID="-5237126120";
 
-/* BIẾN TOÀN CỤC */
 const users = ["Chi", "Kiệt", "Hùng"];
 let user = "";
 let schedule = {};
 
-// Cache dữ liệu realtime
 let globalTasks = [];
 let globalBills = [];
 let globalPayments = [];
 
-/* LOGIN */
 function login(name){
     user = name;
     document.getElementById("app").style.display = "block";
+    // Hiển thị tên người mua tự động
+    document.getElementById("buyerInfo").innerText = ` Ghi nhận hóa đơn cho: ${user} 💖`;
     window.scrollTo({ top: document.getElementById("app").offsetTop, behavior: 'smooth' });
-    
-    // Khởi chạy lắng nghe dữ liệu tổng
     listenData();
 }
 
-/* LẮNG NGHE TẤT CẢ DỮ LIỆU ĐỒNG THỜI */
 function listenData(){
-    // 1. Nhiệm vụ nhà
     db.collection("tasks").onSnapshot(snapshot => {
         globalTasks = [];
         snapshot.forEach(doc => globalTasks.push(doc.data()));
@@ -214,14 +251,12 @@ function listenData(){
         updateUI();
     });
 
-    // 2. Hóa đơn mua đồ
     db.collection("bills").orderBy("time", "desc").onSnapshot(snapshot => {
         globalBills = [];
         snapshot.forEach(doc => globalBills.push(doc.data()));
         updateUI();
     });
 
-    // 3. Lịch sử chuyển tiền trả nợ (Collection mới)
     db.collection("payments").onSnapshot(snapshot => {
         globalPayments = [];
         snapshot.forEach(doc => globalPayments.push(doc.data()));
@@ -229,36 +264,26 @@ function listenData(){
     });
 }
 
-/* AI PHÂN VIỆC */
 function assignAI(){
     let score = {Chi:0, Kiệt:0, Hùng:0};
     globalTasks.forEach(d => score[d.user]++);
-
     let jobs = ["Đổ rác", "Rửa bát", "Nấu cơm"];
     let sorted = Object.entries(score).sort((a,b) => a[1]-b[1]);
-    
     schedule = {};
     for(let i=0; i<sorted.length; i++){
         schedule[sorted[i][0]] = jobs[i];
     }
 }
 
-/* UPDATE TOÀN BỘ GIAO DIỆN */
 function updateUI(){
     if(!user) return;
-    
     renderTasks();
     renderBillHistory();
-    
-    // Tính toán cấn trừ nợ
     let balances = calculateBalances();
-    
-    // Render phần trạng thái và bảng nợ
     renderDailyStatus(balances);
     renderDebt(balances);
 }
 
-/* RENDER NHIỆM VỤ CÁ NHÂN */
 function renderTasks(){
     let today = new Date().toDateString();
     let hasDoneToday = globalTasks.some(d => d.user === user && new Date(d.time).toDateString() === today);
@@ -267,20 +292,19 @@ function renderTasks(){
     if(hasDoneToday) {
         document.getElementById("tasks").innerHTML = `
             <div class="taskBox" style="justify-content: center;">
-                <span class="status-done">🎉 Bạn đã hoàn thành nhiệm vụ hôm nay!</span>
+                <span class="status-done">🌟 Bé đã làm xong việc hôm nay rồi!</span>
             </div>
         `;
     } else {
         document.getElementById("tasks").innerHTML = `
             <div class="taskBox">
-                <div>Nhiệm vụ của bạn: <b>${job}</b></div>
+                <div>Việc của bé là: <b style="color:var(--primary)">${job}</b></div>
                 <input class="taskCheck" type="checkbox" onclick="doneTask('${job}')">
             </div>
         `;
     }
 }
 
-/* LÀM XONG NHIỆM VỤ */
 async function doneTask(job){
     await db.collection("tasks").add({
         user: user,
@@ -291,26 +315,19 @@ async function doneTask(job){
     sendTelegram(user, job);
 }
 
-/* TÍNH TOÁN TIỀN NỢ & TRẢ */
 function calculateBalances() {
     let balances = {Chi:0, Kiệt:0, Hùng:0};
-    
-    // 1. Cộng tiền cho người mua, trừ tiền người xài chung
     globalBills.forEach(b => {
         balances[b.buyer] += b.price;
         users.forEach(u => balances[u] -= b.share);
     });
-
-    // 2. Cấn trừ những khoản đã thanh toán qua nút "Đã chuyển"
     globalPayments.forEach(p => {
-        balances[p.from] += p.amount;  // Người chuyển khoản được cộng lại balance
-        balances[p.to] -= p.amount;    // Người nhận bị trừ bớt khoản đang được nợ
+        balances[p.from] += p.amount;
+        balances[p.to] -= p.amount;
     });
-
-    return balances; // Balance < 0 là Đang Nợ. Balance > 0 là Đang được nợ.
+    return balances;
 }
 
-/* RENDER BẢNG TRẠNG THÁI HÔM NAY (KÈM TÌNH TRẠNG TIỀN BẠC DƯỚI NHIỆM VỤ) */
 function renderDailyStatus(balances){
     let html = "";
     let today = new Date().toDateString();
@@ -319,82 +336,73 @@ function renderDailyStatus(balances){
 
     users.forEach(u => {
         let isDone = usersDoneToday.includes(u);
-        let taskStatus = isDone ? `<span class="status-done">Đã hoàn thành</span>` : `<span class="status-pending">Chưa hoàn thành</span>`;
-        
+        let taskStatus = isDone ? `<span class="status-done">Đã xong ✨</span>` : `<span class="status-pending">Chưa xong 🚧</span>`;
         let financialStatus = "";
-        
-        // 1. Kiểm tra xem hôm nay có mua đồ không
         let spentToday = globalBills.filter(b => b.buyer === u && new Date(b.time).toDateString() === today).reduce((sum, b) => sum + b.price, 0);
-        if(spentToday > 0) {
-            financialStatus += `<div style="font-size: 14px; margin-top: 5px; color:#cbd5e1;">🛒 Đã mua đồ hôm nay: ${spentToday.toLocaleString('vi-VN')} VNĐ</div>`;
-        }
+        
+        if(spentToday > 0) financialStatus += `<div style="font-size: 13px; margin-top: 5px; color:#cbd5e1;">🛍️ Mua: ${spentToday.toLocaleString('vi-VN')}đ</div>`;
 
-        // 2. Hiện trạng thái nợ/trả ở dưới cùng
         let myBalance = balances[u] || 0;
         if(myBalance < 0) {
-            financialStatus += `<div style="font-size: 14px; margin-top: 5px; color:#f85149;">💸 Đang nợ quỹ: ${Math.abs(myBalance).toLocaleString('vi-VN')} VNĐ</div>`;
+            financialStatus += `<div style="font-size: 13px; margin-top: 5px; color:#ff6b6b;">💸 Đang nợ: ${Math.abs(myBalance).toLocaleString('vi-VN')}đ</div>`;
         } else if (myBalance > 0) {
-            financialStatus += `<div style="font-size: 14px; margin-top: 5px; color:#40c463;">💰 Quỹ cần trả lại: ${myBalance.toLocaleString('vi-VN')} VNĐ</div>`;
+            financialStatus += `<div style="font-size: 13px; margin-top: 5px; color:#40c463;">💰 Dư: ${myBalance.toLocaleString('vi-VN')}đ</div>`;
         }
 
         html += `
-        <div class="taskBox" style="flex-direction: column; align-items: flex-start; border-left: 4px solid ${u===user?'#00f2ff':'transparent'};">
-            <div style="font-size: 18px; font-weight: bold; margin-bottom: 5px; color: ${u===user?'#00f2ff':'white'}">${u}</div>
-            <div>Nhiệm vụ: ${taskStatus}</div>
+        <div class="taskBox" style="flex-direction: column; align-items: flex-start; border-left: 4px solid ${u===user?'var(--primary)':'transparent'};">
+            <div style="font-size: 18px; font-weight: bold; margin-bottom: 5px; color: ${u===user?'var(--primary)':'white'}">${u}</div>
+            <div style="font-size:14px">Việc nhà: ${taskStatus}</div>
             ${financialStatus}
         </div>
         `;
     });
-
     document.getElementById("dailyStatus").innerHTML = html;
 }
 
-/* THÊM HÓA ĐƠN */
+/* HÀM THÊM HÓA ĐƠN TỰ ĐỘNG LẤY TÊN USER ĐÃ LOGIN */
 async function addBill(){
     let food = document.getElementById("foodName").value;
     let price = parseInt(document.getElementById("foodPrice").value);
-    let buyer = document.getElementById("buyer").value;
+    
+    // Tự động sử dụng biến 'user' đã chọn lúc đầu
+    let buyer = user;
 
-    if(!food || !price) {
-        alert("Vui lòng nhập tên món và giá tiền!");
-        return;
-    }
-
+    if(!food || !price) { alert("Nhập đủ thông tin bé ơi!"); return; }
+    
     let share = Math.round(price / users.length);
-    await db.collection("bills").add({
-        food: food,
-        price: price,
-        buyer: buyer,
-        share: share,
-        time: Date.now()
+    
+    await db.collection("bills").add({ 
+        food: food, 
+        price: price, 
+        buyer: buyer, 
+        share: share, 
+        time: Date.now() 
     });
-
+    
     document.getElementById("foodName").value = "";
     document.getElementById("foodPrice").value = "";
-
+    
     sendBillTelegram(food, price, buyer, share);
 }
 
-/* RENDER LỊCH SỬ HÓA ĐƠN */
 function renderBillHistory() {
     let html = "";
     globalBills.forEach(b => {
         html += `
         <div class="taskBox" style="flex-direction:column; align-items:flex-start; gap:5px;">
-            <div style="font-weight:bold; color:#00f2ff;">${b.food}</div>
-            <div>💰 Giá: ${b.price.toLocaleString('vi-VN')} VNĐ</div>
-            <div style="font-size:13px; color:#cbd5e1;">💳 Người mua: ${b.buyer} (Mỗi người: ${b.share.toLocaleString('vi-VN')} VNĐ)</div>
+            <div style="font-weight:bold; color:var(--secondary);">${b.food}</div>
+            <div style="font-size:14px">💰 ${b.price.toLocaleString('vi-VN')} VNĐ</div>
+            <div style="font-size:12px; color:#cbd5e1;">👤 ${b.buyer} mua (Mỗi người: ${b.share.toLocaleString('vi-VN')}đ)</div>
         </div>
         `;
     });
     document.getElementById("billList").innerHTML = html;
 }
 
-/* BẢNG NỢ & NÚT THANH TOÁN */
 function renderDebt(balances){
     let debtors = [];
     let creditors = [];
-
     users.forEach(u => {
         if(balances[u] < 0) debtors.push({name: u, amount: Math.abs(balances[u])});
         else if (balances[u] > 0) creditors.push({name: u, amount: balances[u]});
@@ -402,74 +410,49 @@ function renderDebt(balances){
 
     let html = "";
     let i = 0, j = 0;
-    
     while(i < debtors.length && j < creditors.length) {
         let d = debtors[i];
         let c = creditors[j];
         let amountToPay = Math.min(d.amount, c.amount);
-        
         if (amountToPay > 0) {
             html += `
             <div class="taskBox" style="flex-direction: column; align-items: flex-start; gap: 10px;">
-                <div style="font-size: 15px;">💸 <b>${d.name}</b> cần chuyển cho <b>${c.name}</b>: <span style="color:#00f2ff; font-weight:bold;">${amountToPay.toLocaleString('vi-VN')} VNĐ</span></div>
-                ${user === d.name ? `<button style="background:#40c463; color:white; margin:0;" onclick="payDebt('${d.name}', '${c.name}', ${amountToPay})">✅ Xác nhận đã chuyển khoản</button>` : ''}
+                <div style="font-size: 15px;">👉 <b>${d.name}</b> trả <b>${c.name}</b>: <span style="color:var(--primary); font-weight:bold;">${amountToPay.toLocaleString('vi-VN')}đ</span></div>
+                ${user === d.name ? `<button style="background:var(--secondary); color:#1a1a2e; margin:0; padding:8px" onclick="payDebt('${d.name}', '${c.name}', ${amountToPay})">Xác nhận đã chuyển 🌸</button>` : ''}
             </div>
             `;
         }
-
         d.amount -= amountToPay;
         c.amount -= amountToPay;
         if (d.amount === 0) i++;
         if (c.amount === 0) j++;
     }
-
-    if(html === "") {
-        html = `<div class="taskBox" style="justify-content:center; color:#40c463; font-weight:bold;">🎉 Tuyệt vời! Hiện tại không ai nợ ai.</div>`;
-    }
-
+    if(html === "") html = `<div class="taskBox" style="justify-content:center; color:#40c463; font-weight:bold;">🎉 Hết nợ rồi, vui quá đi!</div>`;
     document.getElementById("debt").innerHTML = html;
 }
 
-/* XỬ LÝ KHI BẤM NÚT ĐÃ CHUYỂN KHOẢN */
 async function payDebt(from, to, amount) {
-    if(confirm(`Xác nhận bạn (${from}) ĐÃ CHUYỂN ${amount.toLocaleString('vi-VN')} VNĐ cho ${to}?`)) {
-        await db.collection("payments").add({
-            from: from,
-            to: to,
-            amount: amount,
-            time: Date.now()
-        });
+    if(confirm(`Xác nhận bé (${from}) ĐÃ CHUYỂN ${amount.toLocaleString('vi-VN')}đ cho ${to} nha?`)) {
+        await db.collection("payments").add({ from: from, to: to, amount: amount, time: Date.now() });
         confetti();
         sendTelegramPayment(from, to, amount);
     }
 }
 
-/* GỬI TELEGRAM THÔNG BÁO (GIAO DIỆN HIỆN ĐẠI THEO STYLE DASHBOARD) */
+/* TELEGRAM MESSAGES */
 function sendTelegram(name, job){
     let text = `🤖 <b>[HỆ THỐNG TỰ ĐỘNG]</b>\n\n🟢 <b>CẬP NHẬT NHIỆM VỤ:</b>\n👤 Thành viên: <b>${name}</b>\n✔️ Trạng thái: <b>Hoàn thành</b> (<i>${job}</i>)`;
-    fetch(`https://api.telegram.org/bot${TOKEN}/sendMessage`,{ 
-        method:"POST", 
-        headers:{"Content-Type":"application/json"}, 
-        body:JSON.stringify({chat_id: CHAT_ID, text: text, parse_mode: "HTML"}) 
-    });
+    fetch(`https://api.telegram.org/bot${TOKEN}/sendMessage`,{ method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({chat_id: CHAT_ID, text: text, parse_mode: "HTML"}) });
 }
 
 function sendBillTelegram(food, price, buyer, share){
     let text = `🤖 <b>[HỆ THỐNG TỰ ĐỘNG]</b>\n\n🧾 <b>BIÊN LAI MỚI:</b>\n🛍️ Mặt hàng: <b>${food}</b>\n💵 Tổng chi: <code>${price.toLocaleString('vi-VN')}đ</code>\n💳 Ứng trước: <b>${buyer}</b>\n📊 Cưa ra: <code>${share.toLocaleString('vi-VN')}đ / người</code>`;
-    fetch(`https://api.telegram.org/bot${TOKEN}/sendMessage`,{ 
-        method:"POST", 
-        headers:{"Content-Type":"application/json"}, 
-        body:JSON.stringify({chat_id: CHAT_ID, text: text, parse_mode: "HTML"}) 
-    });
+    fetch(`https://api.telegram.org/bot${TOKEN}/sendMessage`,{ method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({chat_id: CHAT_ID, text: text, parse_mode: "HTML"}) });
 }
 
 function sendTelegramPayment(from, to, amount) {
     let text = `🤖 <b>[HỆ THỐNG TỰ ĐỘNG]</b>\n\n💸 <b>XÁC NHẬN THANH TOÁN:</b>\n👤 Người chuyển: <b>${from}</b>\n🎯 Người nhận: <b>${to}</b>\n💰 Số tiền: <code>${amount.toLocaleString('vi-VN')}đ</code>\n\n✅ <i>Nợ đã được cấn trừ trên hệ thống!</i>`;
-    fetch(`https://api.telegram.org/bot${TOKEN}/sendMessage`,{ 
-        method:"POST", 
-        headers:{"Content-Type":"application/json"}, 
-        body:JSON.stringify({chat_id: CHAT_ID, text: text, parse_mode: "HTML"}) 
-    });
+    fetch(`https://api.telegram.org/bot${TOKEN}/sendMessage`,{ method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({chat_id: CHAT_ID, text: text, parse_mode: "HTML"}) });
 }
 </script>
 
