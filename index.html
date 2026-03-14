@@ -482,21 +482,34 @@ async function payDebt(from, to, amount) {
     }
 }
 
-/* TELEGRAM MESSAGES */
+/* Lấy ngày giờ hiện tại */
+function getCurrentTimeStr() {
+    let now = new Date();
+    return now.toLocaleTimeString('vi-VN') + ' ' + now.toLocaleDateString('vi-VN');
+}
+
+/* CÁC HÀM GỬI TELEGRAM ĐÃ ĐƯỢC LÀM MỚI CHI TIẾT VÀ HIỆN ĐẠI HƠN */
 function sendTelegram(name, job){
-    let text = `🤖 <b>[HỆ THỐNG]</b>\n✔️ <b>${name}</b> đã xong việc: <b>${job}</b>`;
+    let time = getCurrentTimeStr();
+    let text = `🌟 <b>NHIỆM VỤ HOÀN THÀNH</b> 🌟\n\n👤 <b>Thành viên:</b> ${name}\n✅ <b>Nhiệm vụ:</b> ${job}\n⏰ <b>Thời gian:</b> ${time}\n\n<i>Cảm ơn bé đã chăm chỉ nhé! 💖</i>`;
     fetch(`https://api.telegram.org/bot${TOKEN}/sendMessage`,{ method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({chat_id: CHAT_ID, text: text, parse_mode: "HTML"}) });
 }
+
 function sendBillTelegram(food, price, buyer, share){
-    let text = `🛍️ <b>[MUA ĐỒ]</b>\n🍰: ${food}\n💸: ${price.toLocaleString()}đ\n👤: ${buyer}`;
+    let time = getCurrentTimeStr();
+    let text = `🛍️ <b>HÓA ĐƠN MỚI</b> 🛍️\n\n🛒 <b>Món đồ:</b> ${food}\n💸 <b>Tổng tiền:</b> ${price.toLocaleString()} VNĐ\n💳 <b>Người chi:</b> ${buyer}\n📊 <b>Mỗi người chia:</b> ${share.toLocaleString()} VNĐ\n⏰ <b>Thời gian:</b> ${time}\n\n<i>Mọi người nhớ check bảng nợ nha! 📝</i>`;
     fetch(`https://api.telegram.org/bot${TOKEN}/sendMessage`,{ method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({chat_id: CHAT_ID, text: text, parse_mode: "HTML"}) });
 }
+
 function sendTelegramPayment(from, to, amount) {
-    let text = `💸 <b>[THANH TOÁN]</b>\n👤 ${from} ➡️ ${to}\n💰 ${amount.toLocaleString()}đ`;
+    let time = getCurrentTimeStr();
+    let text = `💸 <b>THANH TOÁN NỢ</b> 💸\n\n📤 <b>Người gửi:</b> ${from}\n📥 <b>Người nhận:</b> ${to}\n💰 <b>Số tiền:</b> ${amount.toLocaleString()} VNĐ\n⏰ <b>Thời gian:</b> ${time}\n\n<i>Nợ nần đã được thanh toán sòng phẳng! 🎉</i>`;
     fetch(`https://api.telegram.org/bot${TOKEN}/sendMessage`,{ method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({chat_id: CHAT_ID, text: text, parse_mode: "HTML"}) });
 }
+
 function sendTelegramReminder(name, job) {
-    let text = `📢 <b>[NHẮC NHỞ]</b>\n⚠️ <b>${name}</b> ơi, còn việc <b>${job}</b> chưa làm kìa!`;
+    let time = getCurrentTimeStr();
+    let text = `📢 <b>NHẮC NHỞ NHIỆM VỤ</b> 📢\n\n⚠️ <b>${name}</b> ơi, bé vẫn chưa làm nhiệm vụ: <b>${job}</b> kìa!\n⏰ <b>Thời gian nhắc:</b> ${time}\n\n<i>Làm nhanh cho xong rảnh rang đi chơi nào! 🚀</i>`;
     fetch(`https://api.telegram.org/bot${TOKEN}/sendMessage`,{ method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({chat_id: CHAT_ID, text: text, parse_mode: "HTML"}) });
 }
 </script>
