@@ -15,11 +15,11 @@
 
 <style>
 :root {
-    --primary: #ff85a1; /* Pink cute */
-    --secondary: #7bdff2; /* Blue cute */
+    --primary: #ff85a1;
+    --secondary: #7bdff2;
     --bg: #1a1a2e;
     --card-bg: #242444;
-    --accent: #b79ced; /* Purple cute */
+    --accent: #b79ced;
 }
 
 body {
@@ -65,10 +65,12 @@ h3 {
 .users {
     display: flex;
     gap: 15px;
+    flex-wrap: wrap;
 }
 
 .user {
     flex: 1;
+    min-width: 80px;
     padding: 15px;
     background: #2f2f5d;
     border-radius: 18px;
@@ -137,7 +139,7 @@ button:hover {
     filter: brightness(1.1);
 }
 
-/* --- PHẦN POPUP THÔNG BÁO CỰC ĐẸP --- */
+/* Modal / Popup */
 .modal-overlay {
     position: fixed;
     top: 0; left: 0; width: 100%; height: 100%;
@@ -166,39 +168,15 @@ button:hover {
     to { transform: translateY(0); opacity: 1; }
 }
 
-.modal-icon {
-    font-size: 50px;
-    margin-bottom: 15px;
-    display: block;
-}
-
-.modal-text {
-    font-size: 18px;
-    line-height: 1.6;
-    margin-bottom: 25px;
-}
-
-.modal-name {
-    color: var(--primary);
-    font-weight: 800;
-}
-
-/* --- END POPUP CSS --- */
+.modal-icon { font-size: 50px; margin-bottom: 15px; display: block; }
+.modal-text { font-size: 18px; line-height: 1.6; margin-bottom: 25px; }
+.modal-name { color: var(--primary); font-weight: 800; }
 
 .social-btn {
-    flex: 1;
-    padding: 12px;
-    text-decoration: none;
-    border-radius: 15px;
-    font-weight: bold;
-    text-align: center;
-    color: white;
-    transition: 0.3s;
+    flex: 1; padding: 12px; text-decoration: none; border-radius: 15px;
+    font-weight: bold; text-align: center; color: white; transition: 0.3s;
 }
-.social-btn:hover {
-    transform: translateY(-3px);
-    filter: brightness(1.1);
-}
+.social-btn:hover { transform: translateY(-3px); filter: brightness(1.1); }
 .btn-tele { background: #0088cc; }
 .btn-zalo { background: #0068ff; }
 
@@ -207,7 +185,6 @@ button:hover {
 #billList .taskBox { border-left: 5px solid var(--accent); }
 #debt .taskBox { border-left: 5px solid var(--primary); }
 </style>
-
 </head>
 
 <body>
@@ -235,6 +212,7 @@ button:hover {
         <div class="user" onclick="login('Chi')">Chi</div>
         <div class="user" onclick="login('Kiệt')">Kiệt</div>
         <div class="user" onclick="login('Hùng')">Hùng</div>
+        <div class="user" onclick="login('Bách')">Bách</div>
     </div>
 </div>
 
@@ -256,6 +234,11 @@ button:hover {
     <div class="card">
         <h3><span style="font-size:24px">🌈</span> Trạng thái hôm nay</h3>
         <div id="dailyStatus">Đang tải dữ liệu...</div>
+    </div>
+
+    <div class="card">
+        <h3><span style="font-size:24px">📊</span> Bảng làm việc tháng này</h3>
+        <div id="monthlyStatus">Đang tải dữ liệu...</div>
     </div>
 
     <div class="card" style="background: linear-gradient(to bottom, #242444, #2a2a5a);">
@@ -296,7 +279,7 @@ const db = firebase.firestore();
 const TOKEN="8701701011:AAHbo0avSZXuCX3hGY0NdezE_Ef51GZRE-c";
 const CHAT_ID="-5111756628";
 
-const users = ["Chi", "Kiệt", "Hùng"];
+const users = ["Chi", "Kiệt", "Hùng", "Bách"];
 let user = "";
 let schedule = {};
 
@@ -334,9 +317,11 @@ function listenData(){
 }
 
 function assignAI(){
-    let score = {Chi:0, Kiệt:0, Hùng:0};
-    globalTasks.forEach(d => score[d.user]++);
-    let jobs = ["Đổ rác", "Rửa bát", "Nấu cơm"];
+    let score = {Chi:0, Kiệt:0, Hùng:0, Bách:0};
+    globalTasks.forEach(d => {
+        if(score[d.user] !== undefined) score[d.user]++;
+    });
+    let jobs = ["Đổ rác", "Rửa bát", "Nấu cơm", "Quét nhà"];
     let sorted = Object.entries(score).sort((a,b) => a[1]-b[1]);
     schedule = {};
     for(let i=0; i<sorted.length; i++){ schedule[sorted[i][0]] = jobs[i]; }
@@ -347,7 +332,10 @@ function updateUI(){
     renderTasks();
     renderBillHistory();
     let balances = calculateBalances();
-    renderDailyStatus(balances);
+    
+    // Render các thẻ trạng thái
+    renderDailyStatus(); 
+    renderMonthlyStatus(); 
     renderDebt(balances);
 }
 
@@ -359,7 +347,6 @@ function renderTasks(){
     if(hasDoneToday) {
         document.getElementById("tasks").innerHTML = `<div class="taskBox" style="justify-content: center;"><span class="status-done">🌟 Bé đã làm xong việc hôm nay rồi!</span></div>`;
     } else {
-        // HIỂN THỊ POPUP VÀ PHÁT ÂM THANH
         if (!hasReminded) {
             setTimeout(() => {
                 showModal(user, job);
@@ -377,13 +364,11 @@ function renderTasks(){
     }
 }
 
-// LOGIC POPUP CÓ THÊM ÂM THANH
 function showModal(name, job) {
     document.getElementById("remindUser").innerText = name;
     document.getElementById("remindJob").innerText = job;
     document.getElementById("reminderModal").style.display = "flex";
     
-    // Phát tiếng "Ting"
     let audio = document.getElementById("tingSound");
     audio.play().catch(error => console.log("Trình duyệt chặn phát âm thanh tự động", error));
 }
@@ -399,19 +384,20 @@ async function doneTask(job){
 }
 
 function calculateBalances() {
-    let balances = {Chi:0, Kiệt:0, Hùng:0};
+    let balances = {Chi:0, Kiệt:0, Hùng:0, Bách:0};
     globalBills.forEach(b => {
-        balances[b.buyer] += b.price;
+        if(balances[b.buyer] !== undefined) balances[b.buyer] += b.price;
         users.forEach(u => balances[u] -= b.share);
     });
     globalPayments.forEach(p => {
-        balances[p.from] += p.amount;
-        balances[p.to] -= p.amount;
+        if(balances[p.from] !== undefined) balances[p.from] += p.amount;
+        if(balances[p.to] !== undefined) balances[p.to] -= p.amount;
     });
     return balances;
 }
 
-function renderDailyStatus(balances){
+/* XÓA HIỂN THỊ SỐ DƯ Ở TRẠNG THÁI HÔM NAY */
+function renderDailyStatus(){
     let html = "";
     let today = new Date().toDateString();
     let tasksToday = globalTasks.filter(d => new Date(d.time).toDateString() === today);
@@ -420,17 +406,60 @@ function renderDailyStatus(balances){
     users.forEach(u => {
         let isDone = usersDoneToday.includes(u);
         let taskStatus = isDone ? `<span class="status-done">Đã xong ✨</span>` : `<span class="status-pending">Chưa xong 🚧</span>`;
-        let myBalance = balances[u] || 0;
-        let financialStatus = myBalance < 0 ? `<div style="font-size: 13px; color:#ff6b6b;">💸 Nợ: ${Math.abs(myBalance).toLocaleString()}đ</div>` : `<div style="font-size: 13px; color:#40c463;">💰 Dư: ${myBalance.toLocaleString()}đ</div>`;
 
         html += `
         <div class="taskBox" style="flex-direction: column; align-items: flex-start;">
             <div style="font-weight: bold; color: ${u===user?'var(--primary)':'white'}">${u}</div>
-            <div style="font-size:14px">Việc: ${taskStatus}</div>
-            ${financialStatus}
+            <div style="font-size:14px">Việc hôm nay: ${taskStatus}</div>
         </div>`;
     });
     document.getElementById("dailyStatus").innerHTML = html;
+}
+
+/* THÊM BẢNG LÀM VIỆC THÁNG (Hiển thị Chi hoàn thành 2 nv, Bách chưa làm hôm qua...) */
+function renderMonthlyStatus() {
+    let currentMonth = new Date().getMonth();
+    let currentYear = new Date().getFullYear();
+    
+    // Tính toán ngày hôm qua
+    let yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    let yesterdayStr = yesterday.toDateString();
+    
+    let taskCounts = {Chi: 0, Kiệt: 0, Hùng: 0, Bách: 0};
+    let didYesterday = {Chi: false, Kiệt: false, Hùng: false, Bách: false};
+    
+    globalTasks.forEach(task => {
+        let taskDate = new Date(task.time);
+        
+        // Đếm tổng số nhiệm vụ trong tháng này
+        if (taskDate.getMonth() === currentMonth && taskDate.getFullYear() === currentYear) {
+            if(taskCounts[task.user] !== undefined) taskCounts[task.user]++;
+        }
+        
+        // Kiểm tra xem hôm qua có làm việc không
+        if (taskDate.toDateString() === yesterdayStr) {
+            if(didYesterday[task.user] !== undefined) didYesterday[task.user] = true;
+        }
+    });
+    
+    let html = "";
+    users.forEach(u => {
+        // Cảnh báo nếu hôm qua chưa làm
+        let yesterdayWarning = !didYesterday[u] ? 
+            `<span style="font-size:12px; color:#ff6b6b; display:block; margin-top:5px;">⚠️ Hôm qua chưa làm việc</span>` : 
+            `<span style="font-size:12px; color:#40c463; display:block; margin-top:5px;">✅ Hôm qua đã làm việc</span>`;
+        
+        html += `
+        <div class="taskBox" style="flex-direction: column; align-items: flex-start;">
+            <div style="display: flex; justify-content: space-between; width: 100%;">
+                <div style="font-weight: bold; color: ${u===user?'var(--primary)':'white'}">${u}</div>
+                <div>Đã làm: <b style="color:var(--secondary); font-size: 16px;">${taskCounts[u]}</b> nhiệm vụ</div>
+            </div>
+            ${yesterdayWarning}
+        </div>`;
+    });
+    document.getElementById("monthlyStatus").innerHTML = html;
 }
 
 async function addBill(){
@@ -474,21 +503,13 @@ function renderDebt(balances){
     document.getElementById("debt").innerHTML = html || `<div class="taskBox" style="justify-content:center; color:#40c463;">🎉 Hết nợ!</div>`;
 }
 
-async function payDebt(from, to, amount) {
-    if(confirm(`Xác nhận đã chuyển ${amount.toLocaleString()}đ cho ${to}?`)) {
-        await db.collection("payments").add({ from: from, to: to, amount: amount, time: Date.now() });
-        confetti();
-        sendTelegramPayment(from, to, amount);
-    }
-}
-
-/* Lấy ngày giờ hiện tại */
+/* Lấy ngày giờ hiện tại - Thông báo hiện đại và chi tiết ngày làm */
 function getCurrentTimeStr() {
     let now = new Date();
     return now.toLocaleTimeString('vi-VN') + ' ' + now.toLocaleDateString('vi-VN');
 }
 
-/* CÁC HÀM GỬI TELEGRAM ĐÃ ĐƯỢC LÀM MỚI CHI TIẾT VÀ HIỆN ĐẠI HƠN */
+/* CÁC HÀM GỬI TELEGRAM */
 function sendTelegram(name, job){
     let time = getCurrentTimeStr();
     let text = `🌟 <b>NHIỆM VỤ HOÀN THÀNH</b> 🌟\n\n👤 <b>Thành viên:</b> ${name}\n✅ <b>Nhiệm vụ:</b> ${job}\n⏰ <b>Thời gian:</b> ${time}\n\n<i>Cảm ơn bé đã chăm chỉ nhé! 💖</i>`;
