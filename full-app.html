@@ -1,0 +1,2000 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<title>Homestay Vân Canh</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
+<style>
+:root {
+    --primary: #ff85a1;
+    --secondary: #7bdff2;
+    --bg: #1a1a2e;
+    --card-bg: #242444;
+    --accent: #b79ced;
+    --success: #40c463;
+    --warning: #ffb703;
+    --danger: #ff6b6b;
+    --muted: #b8b8d1;
+}
+
+* { box-sizing: border-box; }
+
+body {
+    font-family: 'Lexend', sans-serif;
+    margin: 0;
+    padding: 20px;
+    background: var(--bg);
+    color: #f0f0f0;
+    transition: background 0.3s ease, color 0.3s ease;
+}
+
+body.night-mode {
+    --bg: #0f1117;
+    --card-bg: #171b26;
+    --primary: #ff9ab1;
+    --secondary: #8ee8f7;
+    --accent: #c3aef4;
+    --muted: #9aa4b2;
+    background: #0f1117;
+    color: #e9edf5;
+}
+
+.container {
+    max-width: 900px;
+    margin: auto;
+}
+
+.title {
+    font-size: 36px;
+    font-weight: 700;
+    margin-bottom: 30px;
+    text-align: center;
+    color: var(--primary);
+    text-shadow: 0 0 15px rgba(255, 133, 161, 0.5);
+}
+
+.card {
+    background: var(--card-bg);
+    border-radius: 24px;
+    padding: 25px;
+    margin-bottom: 25px;
+    border: 2px solid rgba(255, 255, 255, 0.05);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    transition: background 0.3s ease, border-color 0.3s ease;
+}
+
+h3 {
+    margin-top: 0;
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--secondary);
+}
+
+h4 {
+    margin: 16px 0 12px;
+}
+
+.users {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.user {
+    flex: 1;
+    min-width: 80px;
+    padding: 15px;
+    background: #2f2f5d;
+    border-radius: 18px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 600;
+    border: 2px solid transparent;
+}
+
+.user:hover {
+    transform: translateY(-5px);
+    background: var(--primary);
+    color: #fff;
+    box-shadow: 0 5px 15px rgba(255, 133, 161, 0.4);
+}
+
+.taskBox {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 14px;
+    padding: 18px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 20px;
+    margin-bottom: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.taskCheck {
+    width: 26px;
+    height: 26px;
+    cursor: pointer;
+    accent-color: var(--primary);
+    flex-shrink: 0;
+}
+
+input, select, button, textarea {
+    width: 100%;
+    padding: 14px;
+    margin-bottom: 15px;
+    border-radius: 15px;
+    border: 2px solid #3d3d6e;
+    box-sizing: border-box;
+    font-family: 'Lexend', sans-serif;
+    background: #1a1a2e;
+    color: white;
+    outline: none;
+    transition: 0.3s;
+}
+
+body.night-mode input,
+body.night-mode select,
+body.night-mode button,
+body.night-mode textarea {
+    background: #0d1320;
+    color: #eef4ff;
+    border-color: #2c3850;
+}
+
+input:focus, textarea:focus, select:focus {
+    border-color: var(--secondary);
+}
+
+textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+button {
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    color: white;
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    box-shadow: 0 4px 15px rgba(183, 156, 237, 0.3);
+}
+
+button:hover {
+    transform: scale(1.02);
+    filter: brightness(1.1);
+}
+
+button.small-btn {
+    width: auto;
+    padding: 10px 14px;
+    margin: 0;
+    font-size: 13px;
+    border-radius: 12px;
+}
+
+button.btn-secondary {
+    background: linear-gradient(135deg, #4d5bf9, #6a7cff);
+}
+
+button.btn-danger {
+    background: linear-gradient(135deg, #ff6b6b, #ff8787);
+}
+
+button.btn-success {
+    background: linear-gradient(135deg, #36c96f, #57d98b);
+}
+
+button.btn-warning {
+    background: linear-gradient(135deg, #f7b801, #f4c95d);
+    color: #1a1a2e;
+}
+
+button.btn-sos {
+    background: linear-gradient(135deg, #d90429, #ef233c);
+    font-size: 18px;
+    padding: 18px;
+    border-radius: 20px;
+    box-shadow: 0 0 20px rgba(239, 35, 60, 0.5);
+    animation: pulseSOS 1.4s infinite;
+}
+
+@keyframes pulseSOS {
+    0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239,35,60,0.55); }
+    70% { transform: scale(1.01); box-shadow: 0 0 0 16px rgba(239,35,60,0); }
+    100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239,35,60,0); }
+}
+
+.inline-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.badge {
+    display: inline-block;
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.badge-pending {
+    background: rgba(255, 183, 3, 0.18);
+    color: var(--warning);
+    border: 1px solid rgba(255, 183, 3, 0.35);
+}
+
+.badge-confirmed {
+    background: rgba(64, 196, 99, 0.18);
+    color: var(--success);
+    border: 1px solid rgba(64, 196, 99, 0.35);
+}
+
+.social-links {
+    display: flex;
+    gap: 15px;
+}
+
+.social-btn {
+    flex: 1;
+    padding: 12px;
+    text-decoration: none;
+    border-radius: 15px;
+    font-weight: bold;
+    text-align: center;
+    color: white;
+    transition: 0.3s;
+}
+.social-btn:hover { transform: translateY(-3px); filter: brightness(1.1); }
+.btn-tele { background: #0088cc; }
+.btn-zalo { background: #0068ff; }
+
+.status-done { color: var(--success); font-weight: 600; }
+.status-pending { color: var(--danger); font-weight: 600; }
+
+#billList .taskBox { border-left: 5px solid var(--accent); }
+#debt .taskBox { border-left: 5px solid var(--primary); }
+#paymentList .taskBox { border-left: 5px solid var(--secondary); }
+
+.summary-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+}
+
+.summary-item {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.04);
+    border-radius: 18px;
+    padding: 16px;
+}
+
+.summary-top {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.summary-name {
+    font-weight: 700;
+    font-size: 16px;
+}
+
+.progress-wrap {
+    width: 100%;
+    height: 10px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 999px;
+    overflow: hidden;
+    margin: 8px 0 12px;
+}
+
+.progress-bar {
+    height: 100%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, var(--secondary), var(--primary));
+}
+
+.meta-text {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.6;
+}
+
+.note-box {
+    font-size: 13px;
+    color: var(--muted);
+    background: rgba(255,255,255,0.03);
+    padding: 12px 14px;
+    border-radius: 14px;
+    margin-top: 10px;
+}
+
+.empty-box {
+    text-align: center;
+    color: var(--muted);
+    padding: 16px;
+    background: rgba(255,255,255,0.03);
+    border-radius: 18px;
+}
+
+.mini-note {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: -8px;
+    margin-bottom: 10px;
+}
+
+.floating-tools {
+    position: fixed;
+    right: 16px;
+    bottom: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    z-index: 9998;
+}
+
+.floating-tool-btn {
+    width: 62px;
+    height: 62px;
+    border-radius: 20px;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    cursor: pointer;
+    box-shadow: 0 12px 28px rgba(0,0,0,0.35);
+    margin: 0;
+    padding: 0;
+}
+
+.floating-night {
+    background: linear-gradient(135deg, #4d5bf9, #6a7cff);
+}
+
+.floating-sos {
+    background: linear-gradient(135deg, #d90429, #ef233c);
+    animation: pulseSOS 1.4s infinite;
+}
+
+.bank-locked-box {
+    background: rgba(64, 196, 99, 0.1);
+    border: 1px solid rgba(64, 196, 99, 0.35);
+    color: #dff7e5;
+    border-radius: 16px;
+    padding: 14px;
+    margin-bottom: 15px;
+    line-height: 1.6;
+}
+
+/* POPUP MỚI */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(5, 8, 18, 0.72);
+    backdrop-filter: blur(10px);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+    padding: 16px;
+}
+
+.modal-shell {
+    width: 100%;
+    max-width: 460px;
+    background:
+        radial-gradient(circle at top right, rgba(123,223,242,0.18), transparent 30%),
+        radial-gradient(circle at top left, rgba(255,133,161,0.18), transparent 35%),
+        linear-gradient(180deg, #252748, #1b1f34);
+    border: 1px solid rgba(255,255,255,0.08);
+    box-shadow: 0 24px 60px rgba(0,0,0,0.45);
+    border-radius: 30px;
+    padding: 24px;
+    animation: modalPop 0.35s ease;
+}
+
+@keyframes modalPop {
+    from {
+        transform: translateY(18px) scale(0.96);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+    }
+}
+
+.modal-head {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 14px;
+}
+
+.modal-badge {
+    width: 64px;
+    height: 64px;
+    border-radius: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 30px;
+    background: linear-gradient(135deg, rgba(255,133,161,0.25), rgba(123,223,242,0.25));
+    border: 1px solid rgba(255,255,255,0.08);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
+}
+
+.modal-title {
+    font-size: 22px;
+    font-weight: 800;
+    color: white;
+    margin: 0 0 4px;
+}
+
+.modal-subtitle {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.5;
+}
+
+.modal-body {
+    margin: 18px 0;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.04);
+    border-radius: 20px;
+    padding: 16px;
+    color: #edf3ff;
+    line-height: 1.7;
+    font-size: 15px;
+}
+
+.modal-input {
+    width: 100%;
+    margin-top: 14px;
+    margin-bottom: 0;
+    padding: 14px;
+    border-radius: 16px;
+    border: 2px solid rgba(255,255,255,0.08);
+    background: rgba(12, 17, 31, 0.85);
+    color: white;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 18px;
+    flex-wrap: wrap;
+}
+
+.modal-btn {
+    flex: 1;
+    min-width: 120px;
+    padding: 14px 16px;
+    border-radius: 16px;
+    font-weight: 800;
+    border: none;
+    cursor: pointer;
+    margin: 0;
+}
+
+.modal-btn-primary {
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    color: white;
+}
+
+.modal-btn-secondary {
+    background: rgba(255,255,255,0.08);
+    color: #eef4ff;
+    border: 1px solid rgba(255,255,255,0.08);
+}
+
+.modal-btn-success {
+    background: linear-gradient(135deg, #33c46d, #59d98d);
+    color: white;
+}
+
+.modal-btn-danger {
+    background: linear-gradient(135deg, #ff6b6b, #ff8787);
+    color: white;
+}
+
+.debt-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.06);
+    color: white;
+    font-size: 13px;
+    font-weight: 700;
+    margin: 6px 6px 0 0;
+}
+
+.debt-amount {
+    color: #ffd166;
+    font-weight: 800;
+}
+
+@media (max-width: 600px) {
+    body { padding: 12px; }
+
+    .title {
+        font-size: 28px;
+        margin-bottom: 20px;
+    }
+
+    .card {
+        padding: 16px;
+        border-radius: 18px;
+        margin-bottom: 16px;
+    }
+
+    h3 { font-size: 18px; }
+
+    .users {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+
+    .user {
+        min-width: unset;
+        padding: 14px 10px;
+        font-size: 14px;
+    }
+
+    .taskBox {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 14px;
+        border-radius: 16px;
+    }
+
+    .taskCheck {
+        width: 28px;
+        height: 28px;
+    }
+
+    .social-links { flex-direction: column; }
+    .social-btn {
+        font-size: 14px;
+        padding: 12px;
+    }
+
+    .summary-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .inline-actions {
+        width: 100%;
+    }
+
+    .inline-actions button, .inline-actions a {
+        flex: 1;
+    }
+
+    input, select, button, textarea {
+        font-size: 15px;
+    }
+
+    .floating-tools {
+        right: 12px;
+        bottom: 12px;
+        gap: 10px;
+    }
+
+    .floating-tool-btn {
+        width: 56px;
+        height: 56px;
+        font-size: 24px;
+        border-radius: 18px;
+    }
+
+    .modal-shell {
+        padding: 20px;
+        border-radius: 24px;
+    }
+
+    .modal-title {
+        font-size: 20px;
+    }
+}
+
+.page-back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 20px;
+    text-decoration: none;
+    color: var(--secondary);
+    font-weight: 700;
+}
+
+.page-back-link:hover {
+    color: var(--primary);
+}
+
+</style>
+</head>
+
+<body>
+
+<audio id="tingSound" src="https://assets.mixkit.co/active_storage/sfx/2358/2358-preview.mp3" preload="auto"></audio>
+<audio id="sosSound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
+
+<div id="appModal" class="modal-overlay">
+    <div class="modal-shell">
+        <div class="modal-head">
+            <div id="modalIcon" class="modal-badge">✨</div>
+            <div>
+                <div id="modalTitle" class="modal-title">Thông báo</div>
+                <div id="modalSubtitle" class="modal-subtitle">Homestay Vân Canh</div>
+            </div>
+        </div>
+
+        <div id="modalBody" class="modal-body"></div>
+        <input id="modalInput" class="modal-input" type="text" style="display:none;">
+
+        <div class="modal-actions">
+            <button id="modalCancelBtn" class="modal-btn modal-btn-secondary" style="display:none;">Đóng</button>
+            <button id="modalConfirmBtn" class="modal-btn modal-btn-primary">OK</button>
+        </div>
+    </div>
+</div>
+
+<div class="floating-tools">
+    <button class="floating-tool-btn floating-night" onclick="toggleNightMode()" title="Chế độ ban đêm">🌙</button>
+    <button class="floating-tool-btn floating-sos" onclick="triggerEmergency()" title="SOS khẩn cấp">🚨</button>
+</div>
+
+<div class="container">
+
+<div class="title">✨ Homestay Vân Canh ✨</div>
+
+<div class="card">
+    <h3><span style="font-size:24px">🧸</span> Chọn thành viên</h3>
+    <div class="users">
+        <div class="user" onclick="login('Chi')">Chi</div>
+        <div class="user" onclick="login('Kiệt')">Kiệt</div>
+        <div class="user" onclick="login('Hùng')">Hùng</div>
+        <div class="user" onclick="login('Bách')">Bách</div>
+    </div>
+</div>
+
+<div id="app" style="display:none">
+
+    <div id="groupCard" class="card">
+        <h3><span style="font-size:24px">📱</span> Nhóm theo dõi hàng ngày</h3>
+        <div id="groupJoinStatus"></div>
+        <div id="groupJoinActions" class="social-links">
+            <a href="https://t.me/+yYkaTgpWbtg3OTI1" target="_blank" class="social-btn btn-tele" onclick="handleGroupJoin(event, 'Telegram', this.href)">Nhóm Telegram</a>
+            <a href="https://zalo.me/g/mmkc4nxkya5sumqwryjm" target="_blank" class="social-btn btn-zalo" onclick="handleGroupJoin(event, 'Zalo', this.href)">Nhóm Zalo</a>
+        </div>
+    </div>
+
+    <div id="taskCard" class="card">
+        <h3><span style="font-size:24px">📅</span> Nhiệm vụ của bạn</h3>
+        <div id="tasks">Đang tải dữ liệu...</div>
+    </div>
+
+    <div id="statusCard" class="card">
+        <h3><span style="font-size:24px">🌈</span> Trạng thái hôm nay</h3>
+        <div id="dailyStatus">Đang tải dữ liệu...</div>
+    </div>
+
+    <div class="card">
+        <h3><span style="font-size:24px">🏆</span> Tổng kết tháng</h3>
+        <div id="summaryStats">Đang tải dữ liệu...</div>
+    </div>
+
+    <div id="bankCard" class="card">
+        <h3><span style="font-size:24px">🏦</span> Cài đặt thông tin nhận tiền</h3>
+        <div id="bankInfoStatus"></div>
+
+        <div id="bankFormFields">
+            <select id="myBankBin" style="background:#1a1a2e; color:white; padding:14px; border-radius:15px; width:100%; border: 2px solid #3d3d6e;">
+                <option value="970422">MB Bank (Ngân hàng Quân Đội)</option>
+                <option value="970415">VietinBank</option>
+                <option value="970436">Vietcombank</option>
+                <option value="970407">Techcombank</option>
+                <option value="970418">BIDV</option>
+                <option value="970403">Sacombank</option>
+                <option value="970423">TPBank</option>
+                <option value="970448">ACB</option>
+            </select>
+            <input id="myAccount" placeholder="Số tài khoản" type="text" style="margin-top: 15px;">
+            <input id="myName" placeholder="Tên chủ tài khoản (Viết hoa không dấu)" type="text">
+            <button id="saveBankBtn" onclick="saveBankInfo()">Lưu thông tin 1 lần 💾</button>
+            <div class="mini-note">Mỗi thành viên chỉ được cài 1 lần. Sau khi lưu sẽ khóa lại và tạo link QR nhận tiền trên Firebase.</div>
+        </div>
+    </div>
+
+    <div id="billsCard" class="card" style="background: linear-gradient(to bottom, #242444, #2a2a5a);">
+        <h3><span style="font-size:24px">🛒</span> Mua đồ chung</h3>
+        <div style="background: rgba(255,255,255,0.03); padding: 15px; border-radius: 20px;">
+            <input id="foodName" placeholder="Tên món đồ / Dịch vụ 🍰">
+            <input id="foodPrice" type="number" placeholder="Tổng tiền (VNĐ) 💸">
+            <p id="buyerInfo" style="font-size: 13px; margin: 0 0 10px 10px; color: var(--secondary); font-weight: 600;"></p>
+            <button onclick="addBill()">Thêm hóa đơn ngay! ✨</button>
+        </div>
+
+        <h4 style="margin-top: 25px; color: var(--accent);">🕒 Lịch sử mua sắm</h4>
+        <div id="billList"></div>
+    </div>
+
+    <div id="paymentDebtCard" class="card">
+        <h3><span style="font-size:24px">💳</span> Bảng thanh toán nợ</h3>
+        <div id="debt"></div>
+    </div>
+
+    <div id="paymentRequestCard" class="card">
+        <h3><span style="font-size:24px">💸</span> Yêu cầu thanh toán</h3>
+        <div class="note-box" style="margin-bottom:12px;">
+            Các khoản thanh toán sẽ tự động bị xóa sau <b>7 ngày</b> để bảng thanh toán luôn gọn gàng.
+        </div>
+        <div id="paymentList"></div>
+    </div>
+
+</div>
+
+</div>
+
+<script>
+const pageSection = new URLSearchParams(window.location.search).get("section");
+const sectionToCards = {
+    tasks: ["taskCard"],
+    status: ["statusCard"],
+    bills: ["billsCard"],
+    payments: ["paymentDebtCard", "paymentRequestCard"]
+};
+
+function applySectionView() {
+    if (!pageSection || !sectionToCards[pageSection]) return;
+
+    document.querySelectorAll('#app > .card').forEach(card => {
+        card.style.display = 'none';
+    });
+
+    for (const id of sectionToCards[pageSection]) {
+        const el = document.getElementById(id);
+        if (el) el.style.display = 'block';
+    }
+
+    const groupCard = document.getElementById('groupCard');
+    const bankCard = document.getElementById('bankCard');
+    if (groupCard) groupCard.style.display = 'none';
+    if (bankCard) bankCard.style.display = 'none';
+
+    const backLink = document.createElement('a');
+    backLink.href = 'index.html';
+    backLink.className = 'page-back-link';
+    backLink.innerHTML = '⬅️ Quay về trang chủ';
+    const container = document.querySelector('.container');
+    const title = document.querySelector('.title');
+    container.insertBefore(backLink, title.nextSibling);
+}
+
+applySectionView();
+
+const firebaseConfig = {
+    apiKey: "AIzaSyCAH5iHPMiJ8DzAK_CvzlKOlpMlSzGJgLs",
+    authDomain: "firebawweb.firebaseapp.com",
+    projectId: "firebawweb",
+    storageBucket: "firebawweb.firebasestorage.app",
+    messagingSenderId: "246960541396",
+    appId: "1:246960541396:web:f1c7774f4fdfcae71f7541"
+};
+
+if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
+const db = firebase.firestore();
+
+const TOKEN = "8701701011:AAHbo0avSZXuCX3hGY0NdezE_Ef51GZRE-c";
+const CHAT_ID = "-5111756628";
+const APP_URL = "https://dth20006.github.io/lichdonnha/";
+
+const users = ["Chi", "Kiệt", "Hùng", "Bách"];
+const REMIND_HOUR = 19;
+const PAYMENT_EXPIRE_MS = 7 * 24 * 60 * 60 * 1000;
+
+let user = "";
+let schedule = {};
+
+let globalTasks = [];
+let globalBills = [];
+let globalPayments = [];
+let globalBankProfiles = {};
+let globalGroupJoins = {};
+
+let modalState = {
+    onConfirm: null,
+    onCancel: null
+};
+
+function login(name){
+    user = name;
+    document.getElementById("app").style.display = "block";
+    document.getElementById("buyerInfo").innerText = ` Ghi nhận hóa đơn cho: ${user} 💖`;
+    window.scrollTo({ top: document.getElementById("app").offsetTop, behavior: 'smooth' });
+    purgeOldPayments();
+    listenData();
+    refreshBankInfoUI();
+    refreshGroupJoinUI();
+    refreshFeatureCardsUI();
+}
+
+let listenersStarted = false;
+
+function listenData(){
+    if(listenersStarted) return;
+    listenersStarted = true;
+
+    db.collection("tasks").onSnapshot(snapshot => {
+        globalTasks = [];
+        snapshot.forEach(doc => globalTasks.push({ id: doc.id, ...doc.data() }));
+        assignAI();
+        updateUI();
+    });
+
+    db.collection("bills").orderBy("time", "desc").onSnapshot(snapshot => {
+        globalBills = [];
+        snapshot.forEach(doc => globalBills.push({ id: doc.id, ...doc.data() }));
+        updateUI();
+    });
+
+    db.collection("payments").orderBy("time", "desc").onSnapshot(snapshot => {
+        globalPayments = [];
+        snapshot.forEach(doc => globalPayments.push({ id: doc.id, ...doc.data() }));
+        updateUI();
+    });
+
+    db.collection("bankProfiles").onSnapshot(snapshot => {
+        globalBankProfiles = {};
+        snapshot.forEach(doc => {
+            globalBankProfiles[doc.id] = doc.data();
+        });
+        refreshBankInfoUI();
+        refreshFeatureCardsUI();
+        updateUI();
+    });
+
+    db.collection("groupJoins").onSnapshot(snapshot => {
+        globalGroupJoins = {};
+        snapshot.forEach(doc => {
+            globalGroupJoins[doc.id] = doc.data();
+        });
+        refreshGroupJoinUI();
+        refreshFeatureCardsUI();
+    });
+}
+
+/* POPUP CUSTOM */
+function closeAppModal(){
+    document.getElementById("appModal").style.display = "none";
+    document.getElementById("modalInput").style.display = "none";
+    document.getElementById("modalInput").value = "";
+    modalState.onConfirm = null;
+    modalState.onCancel = null;
+}
+
+function openAppModal({
+    icon = "✨",
+    title = "Thông báo",
+    subtitle = "Homestay Vân Canh",
+    html = "",
+    input = false,
+    inputPlaceholder = "",
+    inputValue = "",
+    confirmText = "OK",
+    cancelText = "",
+    confirmClass = "modal-btn-primary",
+    onConfirm = null,
+    onCancel = null
+} = {}){
+    document.getElementById("modalIcon").innerHTML = icon;
+    document.getElementById("modalTitle").innerHTML = title;
+    document.getElementById("modalSubtitle").innerHTML = subtitle;
+    document.getElementById("modalBody").innerHTML = html;
+
+    const inputEl = document.getElementById("modalInput");
+    inputEl.style.display = input ? "block" : "none";
+    inputEl.placeholder = inputPlaceholder || "";
+    inputEl.value = inputValue || "";
+
+    const confirmBtn = document.getElementById("modalConfirmBtn");
+    const cancelBtn = document.getElementById("modalCancelBtn");
+
+    confirmBtn.innerText = confirmText;
+    confirmBtn.className = `modal-btn ${confirmClass}`;
+    cancelBtn.style.display = cancelText ? "block" : "none";
+    cancelBtn.innerText = cancelText || "Đóng";
+
+    modalState.onConfirm = onConfirm;
+    modalState.onCancel = onCancel;
+
+    document.getElementById("appModal").style.display = "flex";
+
+    if(input){
+        setTimeout(() => inputEl.focus(), 120);
+    }
+}
+
+document.getElementById("modalConfirmBtn").onclick = () => {
+    const inputValue = document.getElementById("modalInput").value;
+    const fn = modalState.onConfirm;
+    closeAppModal();
+    if(fn) fn(inputValue);
+};
+
+document.getElementById("modalCancelBtn").onclick = () => {
+    const fn = modalState.onCancel;
+    closeAppModal();
+    if(fn) fn();
+};
+
+document.getElementById("appModal").addEventListener("click", (e) => {
+    if(e.target.id === "appModal"){
+        const fn = modalState.onCancel;
+        closeAppModal();
+        if(fn) fn();
+    }
+});
+
+function appAlert(message, title = "Thông báo", icon = "✨", confirmText = "Đã hiểu"){
+    return new Promise(resolve => {
+        openAppModal({
+            icon,
+            title,
+            html: message,
+            confirmText,
+            confirmClass: "modal-btn-primary",
+            onConfirm: () => resolve(true)
+        });
+    });
+}
+
+function appConfirm(message, title = "Xác nhận", icon = "💡", confirmText = "Đồng ý", cancelText = "Hủy"){
+    return new Promise(resolve => {
+        openAppModal({
+            icon,
+            title,
+            html: message,
+            confirmText,
+            cancelText,
+            confirmClass: "modal-btn-success",
+            onConfirm: () => resolve(true),
+            onCancel: () => resolve(false)
+        });
+    });
+}
+
+function appPrompt(message, defaultValue = "", placeholder = "", title = "Nhập thông tin", icon = "✍️"){
+    return new Promise(resolve => {
+        openAppModal({
+            icon,
+            title,
+            html: message,
+            input: true,
+            inputPlaceholder: placeholder,
+            inputValue: defaultValue,
+            confirmText: "Xác nhận",
+            cancelText: "Hủy",
+            confirmClass: "modal-btn-primary",
+            onConfirm: (value) => resolve(value),
+            onCancel: () => resolve(null)
+        });
+    });
+}
+
+function assignAI(){
+    let score = { Chi: 0, Kiệt: 0, Hùng: 0, Bách: 0 };
+    globalTasks.forEach(d => {
+        if(score[d.user] !== undefined) score[d.user]++;
+    });
+    let jobs = ["Đổ rác", "Rửa bát", "Nấu cơm", "Quét nhà"];
+    let sorted = Object.entries(score).sort((a,b) => a[1] - b[1]);
+    schedule = {};
+    for(let i = 0; i < sorted.length; i++){
+        schedule[sorted[i][0]] = jobs[i];
+    }
+}
+
+function updateUI(){
+    if(!user) return;
+    renderTasks();
+    renderBillHistory();
+
+    const balances = calculateBalances();
+    renderDailyStatus();
+    renderSummaryStats(balances);
+    renderDebt(balances);
+    renderPayments();
+    refreshBankInfoUI();
+    refreshGroupJoinUI();
+    refreshFeatureCardsUI();
+    maybeShowDebtPopup();
+}
+
+function formatCurrency(num){
+    return Math.round(Number(num || 0)).toLocaleString('vi-VN') + "đ";
+}
+
+function getTodayKey(){
+    return new Date().toDateString();
+}
+
+function getReminderKey(name){
+    return `reminded_${name}_${getTodayKey()}`;
+}
+
+function getDebtPopupKey(type, a, b){
+    return `debt_popup_${type}_${a}_${b}_${getTodayKey()}`;
+}
+
+function getDebtTelegramKey(a, b){
+    return `debt_tele_${a}_${b}_${getTodayKey()}`;
+}
+
+function shouldRemindToday(hasDoneToday){
+    if(hasDoneToday) return false;
+    const now = new Date();
+    if(now.getHours() < REMIND_HOUR) return false;
+    const remindKey = getReminderKey(user);
+    if(localStorage.getItem(remindKey)) return false;
+    return true;
+}
+
+function triggerSmartReminder(job){
+    const remindKey = getReminderKey(user);
+    localStorage.setItem(remindKey, "1");
+
+    setTimeout(() => {
+        showReminderPopup(user, job);
+        sendTelegramReminder(user, job);
+    }, 500);
+}
+
+function showReminderPopup(name, job) {
+    const audio = document.getElementById("tingSound");
+    audio.currentTime = 0;
+    audio.play().catch(error => console.log("Trình duyệt chặn phát âm thanh tự động", error));
+
+    openAppModal({
+        icon: "📢",
+        title: `${name} ơi, nhớ việc nhé`,
+        subtitle: "Nhắc việc dễ thương từ hệ thống",
+        html: `
+            Bé vẫn còn nhiệm vụ <b style="color:var(--secondary)">${job}</b> chưa làm kìa 🌸<br>
+            Làm xong nhớ quay lại app tích hoàn thành nhé ✨
+        `,
+        confirmText: "Vâng ạ, em làm ngay!",
+        confirmClass: "modal-btn-primary"
+    });
+}
+
+function renderTasks(){
+    let today = getTodayKey();
+    let hasDoneToday = globalTasks.some(d => d.user === user && new Date(d.time).toDateString() === today);
+    let job = schedule[user] || "Chưa có phân công";
+
+    if(hasDoneToday) {
+        document.getElementById("tasks").innerHTML = `
+            <div class="taskBox" style="justify-content:center;">
+                <span class="status-done">🌟 Bé đã làm xong việc hôm nay rồi!</span>
+            </div>
+        `;
+        return;
+    }
+
+    if(shouldRemindToday(hasDoneToday)) {
+        triggerSmartReminder(job);
+    }
+
+    const now = new Date();
+    const remindNote = now.getHours() < REMIND_HOUR
+        ? `<div class="note-box">📌 Hệ thống sẽ nhắc việc tự động sau <b>${REMIND_HOUR}:00</b> nếu bé vẫn chưa hoàn thành nhiệm vụ hôm nay.</div>`
+        : `<div class="note-box">📌 Hôm nay nếu chưa làm việc, hệ thống chỉ nhắc <b>1 lần</b> để tránh làm phiền quá nhiều.</div>`;
+
+    document.getElementById("tasks").innerHTML = `
+        <div class="taskBox" style="border-left: 5px solid var(--primary);">
+            <div style="flex:1;">
+                <div>Việc của bé hôm nay: <b style="color:var(--primary)">${job}</b></div>
+                <div style="font-size:13px; color:var(--muted); margin-top:6px;">Đánh dấu khi đã hoàn thành nhé ✨</div>
+            </div>
+            <input class="taskCheck" type="checkbox" onclick="doneTask('${job}')">
+        </div>
+        ${remindNote}
+    `;
+}
+
+async function doneTask(job){
+    await db.collection("tasks").add({
+        user: user,
+        job: job,
+        time: Date.now()
+    });
+    confetti();
+    sendTelegram(user, job);
+}
+
+function calculateBalances() {
+    let balances = { Chi: 0, Kiệt: 0, Hùng: 0, Bách: 0 };
+
+    globalBills.forEach(b => {
+        if(balances[b.buyer] !== undefined) balances[b.buyer] += Number(b.price || 0);
+        users.forEach(u => balances[u] -= Number(b.share || 0));
+    });
+
+    globalPayments.forEach(p => {
+        if(p.status !== "confirmed") return;
+        if(balances[p.from] !== undefined) balances[p.from] += Number(p.amount || 0);
+        if(balances[p.to] !== undefined) balances[p.to] -= Number(p.amount || 0);
+    });
+
+    return balances;
+}
+
+function getDebtSuggestions() {
+    const balances = calculateBalances();
+    let debtors = [];
+    let creditors = [];
+
+    users.forEach(u => {
+        const roundedBalance = Math.round(balances[u]);
+        if(roundedBalance < 0) debtors.push({ name: u, amount: Math.abs(roundedBalance) });
+        else if (roundedBalance > 0) creditors.push({ name: u, amount: roundedBalance });
+    });
+
+    let suggestions = [];
+    let i = 0, j = 0;
+
+    while(i < debtors.length && j < creditors.length) {
+        let d = debtors[i];
+        let c = creditors[j];
+        let pay = Math.min(d.amount, c.amount);
+
+        suggestions.push({
+            from: d.name,
+            to: c.name,
+            amount: pay,
+            qrUrl: generateVietQRForUser(c.name, pay, `${d.name} chuyen ${c.name}`)
+        });
+
+        d.amount -= pay;
+        c.amount -= pay;
+
+        if (d.amount === 0) i++;
+        if (c.amount === 0) j++;
+    }
+
+    return suggestions;
+}
+
+function renderDailyStatus(){
+    let html = "";
+    let today = getTodayKey();
+    let tasksToday = globalTasks.filter(d => new Date(d.time).toDateString() === today);
+    let usersDoneToday = tasksToday.map(d => d.user);
+
+    users.forEach(u => {
+        let isDone = usersDoneToday.includes(u);
+        let taskStatus = isDone
+            ? `<span class="status-done">Đã xong ✨</span>`
+            : `<span class="status-pending">Chưa xong 🚧</span>`;
+
+        html += `
+        <div class="taskBox" style="flex-direction: column; align-items: flex-start;">
+            <div style="font-weight: bold; color: ${u === user ? 'var(--primary)' : 'white'}">${u}</div>
+            <div style="font-size:14px">Việc hôm nay: ${taskStatus}</div>
+            <div style="font-size:12px; color:var(--muted);">Phân công: ${schedule[u] || 'Chưa có'}</div>
+        </div>`;
+    });
+
+    document.getElementById("dailyStatus").innerHTML = html;
+}
+
+function renderSummaryStats(balances){
+    let currentMonth = new Date().getMonth();
+    let currentYear = new Date().getFullYear();
+
+    let daysInMonthSoFar = new Date().getDate();
+    let taskCounts = { Chi: 0, Kiệt: 0, Hùng: 0, Bách: 0 };
+    let expenseTotals = { Chi: 0, Kiệt: 0, Hùng: 0, Bách: 0 };
+    let workedDaysSet = { Chi: new Set(), Kiệt: new Set(), Hùng: new Set(), Bách: new Set() };
+
+    globalTasks.forEach(task => {
+        let taskDate = new Date(task.time);
+        if (taskDate.getMonth() === currentMonth && taskDate.getFullYear() === currentYear) {
+            if(taskCounts[task.user] !== undefined) taskCounts[task.user]++;
+            workedDaysSet[task.user].add(taskDate.toDateString());
+        }
+    });
+
+    globalBills.forEach(bill => {
+        let billDate = new Date(bill.time);
+        if (billDate.getMonth() === currentMonth && billDate.getFullYear() === currentYear) {
+            if(expenseTotals[bill.buyer] !== undefined) expenseTotals[bill.buyer] += Number(bill.price || 0);
+        }
+    });
+
+    let maxTasks = Math.max(...users.map(u => taskCounts[u]), 1);
+
+    let html = `<div class="summary-grid">`;
+
+    users.forEach(u => {
+        let workedDays = workedDaysSet[u].size;
+        let missedDays = Math.max(daysInMonthSoFar - workedDays, 0);
+        let progress = Math.round((taskCounts[u] / maxTasks) * 100);
+        let balance = balances[u];
+        let balanceText = "Cân bằng";
+        let balanceColor = "var(--secondary)";
+
+        if(balance > 0){
+            balanceText = `Được nhận ${formatCurrency(balance)}`;
+            balanceColor = "var(--success)";
+        } else if(balance < 0){
+            balanceText = `Cần trả ${formatCurrency(Math.abs(balance))}`;
+            balanceColor = "var(--danger)";
+        }
+
+        html += `
+        <div class="summary-item">
+            <div class="summary-top">
+                <div class="summary-name" style="color:${u === user ? 'var(--primary)' : 'white'}">${u}</div>
+                <div style="font-size:13px; color:var(--secondary); font-weight:700;">${taskCounts[u]} nhiệm vụ</div>
+            </div>
+
+            <div class="progress-wrap">
+                <div class="progress-bar" style="width:${progress}%"></div>
+            </div>
+
+            <div class="meta-text">
+                📅 Số ngày đã làm: <b>${workedDays}</b><br>
+                🚧 Số ngày chưa làm: <b>${missedDays}</b><br>
+                🛒 Đã ứng: <b>${formatCurrency(expenseTotals[u])}</b><br>
+                💳 <span style="color:${balanceColor}; font-weight:700;">${balanceText}</span>
+            </div>
+        </div>`;
+    });
+
+    html += `</div>`;
+
+    const topWorker = users.reduce((best, current) => taskCounts[current] > taskCounts[best] ? current : best, users[0]);
+    const topBuyer = users.reduce((best, current) => expenseTotals[current] > expenseTotals[best] ? current : best, users[0]);
+
+    html += `
+        <div class="note-box">
+            🏆 Chăm chỉ nhất tháng này: <b>${topWorker}</b> (${taskCounts[topWorker]} nhiệm vụ) <br>
+            💸 Ứng nhiều nhất tháng này: <b>${topBuyer}</b> (${formatCurrency(expenseTotals[topBuyer])})
+        </div>
+    `;
+
+    document.getElementById("summaryStats").innerHTML = html;
+}
+
+async function addBill(){
+    let food = document.getElementById("foodName").value.trim();
+    let price = parseInt(document.getElementById("foodPrice").value);
+
+    if(!food || !price || price <= 0) {
+        await appAlert("Nhập đủ thông tin hợp lệ bé ơi!", "Thiếu thông tin", "⚠️");
+        return;
+    }
+
+    let share = Math.round(price / users.length);
+
+    await db.collection("bills").add({
+        food: food,
+        price: price,
+        buyer: user,
+        share: share,
+        time: Date.now()
+    });
+
+    document.getElementById("foodName").value = "";
+    document.getElementById("foodPrice").value = "";
+    sendBillTelegram(food, price, user, share);
+}
+
+async function editBill(id){
+    const bill = globalBills.find(b => b.id === id);
+    if(!bill) return;
+
+    let newFood = await appPrompt(
+        "Sửa tên món đồ / dịch vụ bên dưới nhé ✍️",
+        bill.food,
+        "Tên món đồ / dịch vụ",
+        "Sửa hóa đơn",
+        "📝"
+    );
+    if(newFood === null) return;
+    newFood = newFood.trim();
+
+    if(!newFood) {
+        await appAlert("Tên món đồ không được để trống.", "Không hợp lệ", "⚠️");
+        return;
+    }
+
+    let newPriceInput = await appPrompt(
+        "Nhập lại tổng tiền (VNĐ) 💸",
+        String(bill.price),
+        "Ví dụ: 120000",
+        "Sửa số tiền",
+        "💰"
+    );
+    if(newPriceInput === null) return;
+
+    let newPrice = parseInt(newPriceInput);
+    if(!newPrice || newPrice <= 0) {
+        await appAlert("Số tiền không hợp lệ.", "Không hợp lệ", "⚠️");
+        return;
+    }
+
+    let newShare = Math.round(newPrice / users.length);
+
+    await db.collection("bills").doc(id).update({
+        food: newFood,
+        price: newPrice,
+        share: newShare
+    });
+
+    await appAlert("Đã sửa hóa đơn thành công ✨", "Thành công", "✅");
+}
+
+async function deleteBill(id){
+    const bill = globalBills.find(b => b.id === id);
+    if(!bill) return;
+
+    let ok = await appConfirm(`Xóa hóa đơn <b>${bill.food}</b> của <b>${bill.buyer}</b> chứ?`, "Xóa hóa đơn", "🗑️", "Xóa luôn", "Thôi");
+    if(!ok) return;
+
+    await db.collection("bills").doc(id).delete();
+    await appAlert("Đã xóa hóa đơn 🗑️", "Đã xóa", "✅");
+}
+
+function renderBillHistory() {
+    let html = "";
+
+    if(globalBills.length === 0){
+        document.getElementById("billList").innerHTML = `<div class="empty-box">Chưa có hóa đơn nào nhé 🌸</div>`;
+        return;
+    }
+
+    globalBills.forEach(b => {
+        html += `
+        <div class="taskBox" style="flex-direction:column; align-items:flex-start; font-size:14px;">
+            <div style="width:100%; display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap;">
+                <div>
+                    <div style="font-weight:bold; color:var(--secondary); margin-bottom:6px;">${b.food}</div>
+                    <div>💰 ${formatCurrency(b.price)}</div>
+                    <div>👤 ${b.buyer}</div>
+                    <div>📊 Mỗi người: ${formatCurrency(b.share)}</div>
+                    <div style="font-size:12px; color:var(--muted); margin-top:6px;">🕒 ${formatDateTime(b.time)}</div>
+                </div>
+
+                ${user === b.buyer ? `
+                <div class="inline-actions">
+                    <button class="small-btn btn-secondary" onclick="editBill('${b.id}')">Sửa</button>
+                    <button class="small-btn btn-danger" onclick="deleteBill('${b.id}')">Xóa</button>
+                </div>
+                ` : ``}
+            </div>
+        </div>`;
+    });
+
+    document.getElementById("billList").innerHTML = html;
+}
+
+function buildQrLink(bin, acc, name, amount = 0, description = "") {
+    return `https://img.vietqr.io/image/${bin}-${acc}-compact2.png?amount=${amount}&addInfo=${encodeURIComponent(description)}&accountName=${encodeURIComponent(name)}`;
+}
+
+async function saveBankInfo() {
+    if(!user){
+        await appAlert("Chọn thành viên trước nhé.", "Chưa chọn người dùng", "👤");
+        return;
+    }
+
+    const existing = globalBankProfiles[user];
+    if(existing && existing.locked){
+        await appAlert("Thông tin nhận tiền của bạn đã được cài trước đó và đã khóa.", "Đã khóa", "🔒");
+        return;
+    }
+
+    const bin = document.getElementById("myBankBin").value;
+    const acc = document.getElementById("myAccount").value.trim();
+    const name = document.getElementById("myName").value.trim().toUpperCase();
+
+    if(!acc || !name) {
+        await appAlert("Nhập đủ thông tin nha!", "Thiếu thông tin", "⚠️");
+        return;
+    }
+
+    const qrLink = buildQrLink(bin, acc, name);
+
+    try{
+        const ref = db.collection("bankProfiles").doc(user);
+        const docSnap = await ref.get();
+
+        if(docSnap.exists && docSnap.data()?.locked){
+            await appAlert("Thông tin nhận tiền của bạn đã được cài trước đó và đã khóa.", "Đã khóa", "🔒");
+            refreshBankInfoUI();
+            refreshFeatureCardsUI();
+            return;
+        }
+
+        await ref.set({
+            user,
+            bin,
+            account: acc,
+            accountName: name,
+            qrLink,
+            locked: true,
+            createdAt: Date.now()
+        });
+
+        await appAlert("Đã lưu thông tin tài khoản lên Firebase và ẩn card này luôn nhé ✨", "Lưu thành công", "✅");
+        refreshBankInfoUI();
+        refreshFeatureCardsUI();
+    }catch(err){
+        console.log(err);
+        await appAlert("Lưu thất bại, thử lại nhé.", "Có lỗi xảy ra", "❌");
+    }
+}
+
+function refreshBankInfoUI(){
+    const statusBox = document.getElementById("bankInfoStatus");
+    const bankSelect = document.getElementById("myBankBin");
+    const accountInput = document.getElementById("myAccount");
+    const nameInput = document.getElementById("myName");
+    const saveBtn = document.getElementById("saveBankBtn");
+    const bankFormFields = document.getElementById("bankFormFields");
+
+    if(!statusBox || !bankSelect || !accountInput || !nameInput || !saveBtn || !bankFormFields) return;
+
+    if(!user){
+        statusBox.innerHTML = `<div class="note-box">Chọn thành viên trước để cài thông tin nhận tiền.</div>`;
+        bankFormFields.style.display = "block";
+        return;
+    }
+
+    const profile = globalBankProfiles[user];
+
+    if(profile && profile.locked){
+        bankSelect.value = profile.bin || "970422";
+        accountInput.value = profile.account || "";
+        nameInput.value = profile.accountName || "";
+        statusBox.innerHTML = "";
+        bankFormFields.style.display = "none";
+    } else {
+        bankFormFields.style.display = "block";
+        saveBtn.innerText = "Lưu thông tin 1 lần 💾";
+        statusBox.innerHTML = `
+            <div class="note-box">
+                Bạn chỉ có thể lưu thông tin nhận tiền <b>1 lần duy nhất</b>.
+            </div>
+        `;
+    }
+}
+
+function refreshFeatureCardsUI(){
+    const bankCard = document.getElementById("bankCard");
+    const groupCard = document.getElementById("groupCard");
+
+    if(!bankCard || !groupCard) return;
+
+    if(!user){
+        bankCard.style.display = "block";
+        groupCard.style.display = "block";
+        return;
+    }
+
+    const bankLocked = globalBankProfiles[user] && globalBankProfiles[user].locked;
+    const groupLocked = globalGroupJoins[user] && globalGroupJoins[user].locked;
+
+    bankCard.style.display = bankLocked ? "none" : "block";
+    groupCard.style.display = groupLocked ? "none" : "block";
+}
+
+function generateVietQRForUser(targetUser, amount, description) {
+    const profile = globalBankProfiles[targetUser];
+    if(!profile || !profile.bin || !profile.account || !profile.accountName) return null;
+    return buildQrLink(profile.bin, profile.account, profile.accountName, amount, description);
+}
+
+async function handleGroupJoin(event, platform, url){
+    event.preventDefault();
+
+    if(!user){
+        await appAlert("Chọn thành viên trước nhé.", "Chưa chọn người dùng", "👤");
+        return;
+    }
+
+    const existing = globalGroupJoins[user];
+    if(existing && existing.locked){
+        await appAlert("Bạn đã bấm tham gia nhóm trước đó rồi.", "Đã tham gia", "🔒");
+        refreshGroupJoinUI();
+        refreshFeatureCardsUI();
+        return;
+    }
+
+    try{
+        const ref = db.collection("groupJoins").doc(user);
+        const docSnap = await ref.get();
+
+        if(docSnap.exists && docSnap.data()?.locked){
+            await appAlert("Bạn đã bấm tham gia nhóm trước đó rồi.", "Đã tham gia", "🔒");
+            refreshGroupJoinUI();
+            refreshFeatureCardsUI();
+            return;
+        }
+
+        await ref.set({
+            user,
+            platform,
+            locked: true,
+            joinedAt: Date.now()
+        });
+
+        window.open(url, "_blank");
+        refreshGroupJoinUI();
+        refreshFeatureCardsUI();
+    }catch(err){
+        console.log(err);
+        await appAlert("Không thể ghi nhận tham gia nhóm, thử lại nhé.", "Có lỗi xảy ra", "❌");
+    }
+}
+
+function refreshGroupJoinUI(){
+    const statusBox = document.getElementById("groupJoinStatus");
+    const actionBox = document.getElementById("groupJoinActions");
+
+    if(!statusBox || !actionBox) return;
+
+    if(!user){
+        statusBox.innerHTML = `<div class="note-box">Chọn thành viên trước để vào nhóm theo dõi.</div>`;
+        actionBox.style.display = "flex";
+        return;
+    }
+
+    const joined = globalGroupJoins[user];
+
+    if(joined && joined.locked){
+        actionBox.style.display = "none";
+        statusBox.innerHTML = "";
+    } else {
+        actionBox.style.display = "flex";
+        statusBox.innerHTML = `
+            <div class="note-box">
+                Mỗi thành viên chỉ được bấm tham gia nhóm <b>1 lần duy nhất</b>.
+            </div>
+        `;
+    }
+}
+
+function openDebtQr(from, to, amount){
+    const qrUrl = generateVietQRForUser(to, amount, `${from} chuyen ${to}`);
+    if(!qrUrl){
+        appAlert(`Hiện chưa có mã QR của <b>${to}</b>, nên chưa mở chuyển khoản được.`, "Thiếu thông tin QR", "⚠️");
+        return;
+    }
+    window.open(qrUrl, "_blank");
+}
+
+function renderDebt(){
+    const suggestions = getDebtSuggestions();
+    let html = "";
+
+    suggestions.forEach(item => {
+        html += `
+        <div class="taskBox" style="flex-direction: column; align-items: flex-start; gap: 10px;">
+            <div>👉 <b>${item.from}</b> trả <b>${item.to}</b>: <span style="color:var(--primary);">${formatCurrency(item.amount)}</span></div>
+            <div style="font-size:13px; color:var(--muted);">Chỉ tính các khoản thanh toán đã được người nhận xác nhận.</div>
+            <div class="inline-actions">
+                ${user === item.from ? `
+                    <button class="small-btn btn-success" onclick="openDebtQr('${item.from}', '${item.to}', ${item.amount})">Trả nợ ngay 💸</button>
+                    <button class="small-btn btn-warning" onclick="payDebt('${item.from}', '${item.to}', ${item.amount})">Đã chuyển rồi 🌸</button>
+                ` : ''}
+
+                ${user === item.to ? `
+                    <button class="small-btn btn-secondary" onclick="showCreditorQuickView('${item.from}', '${item.to}', ${item.amount})">Xem người đang nợ</button>
+                ` : ''}
+            </div>
+        </div>`;
+    });
+
+    document.getElementById("debt").innerHTML = html || `<div class="taskBox" style="justify-content:center; color:#40c463;">🎉 Hết nợ!</div>`;
+}
+
+function showCreditorQuickView(from, to, amount){
+    openAppModal({
+        icon: "💰",
+        title: `${from} đang nợ ${to}`,
+        subtitle: "Thông tin công nợ hiện tại",
+        html: `
+            <div><b>${from}</b> đang nợ bạn <span class="debt-amount">${formatCurrency(amount)}</span>.</div>
+            <div style="margin-top:10px; color:var(--muted); font-size:13px;">Bạn có thể xem tiếp ở bảng thanh toán trong web nhé.</div>
+        `,
+        confirmText: "Đã hiểu",
+        confirmClass: "modal-btn-success"
+    });
+}
+
+function maybeShowDebtPopup(){
+    if(!user) return;
+
+    const suggestions = getDebtSuggestions();
+    if(!suggestions.length) return;
+
+    const owes = suggestions.filter(x => x.from === user);
+    const gets = suggestions.filter(x => x.to === user);
+
+    if(owes.length){
+        const firstDebt = owes[0];
+        const popupKey = getDebtPopupKey("debtor", firstDebt.from, firstDebt.to);
+        const teleKey = getDebtTelegramKey(firstDebt.from, firstDebt.to);
+
+        if(localStorage.getItem(popupKey)) return;
+        localStorage.setItem(popupKey, "1");
+
+        const qrBtnClass = firstDebt.qrUrl ? "modal-btn-danger" : "modal-btn-secondary";
+
+        openAppModal({
+            icon: "💸",
+            title: `Bé đang nợ ${firstDebt.to} nè`,
+            subtitle: "Nhắc nợ tự động khi vào web",
+            html: `
+                <div>Bạn đang cần trả <span class="debt-amount">${formatCurrency(firstDebt.amount)}</span> cho <b>${firstDebt.to}</b>.</div>
+                <div style="margin-top:12px;">
+                    <span class="debt-pill">👤 Người nhận: ${firstDebt.to}</span>
+                    <span class="debt-pill">💰 Số tiền: ${formatCurrency(firstDebt.amount)}</span>
+                </div>
+                <div style="margin-top:12px; font-size:13px; color:var(--muted);">
+                    Chọn <b>Thanh toán ngay</b> để mở mã QR, hoặc <b>Thanh toán sau</b> để hệ thống báo lên Telegram rằng bạn đang còn nợ.
+                </div>
+            `,
+            confirmText: firstDebt.qrUrl ? "Thanh toán ngay 💸" : "Xem khoản nợ",
+            cancelText: "Thanh toán sau",
+            confirmClass: qrBtnClass,
+            onConfirm: () => {
+                if(firstDebt.qrUrl){
+                    window.open(firstDebt.qrUrl, "_blank");
+                }
+            },
+            onCancel: async () => {
+                if(!localStorage.getItem(teleKey)){
+                    localStorage.setItem(teleKey, "1");
+                    sendTelegramDebtNotice(firstDebt.from, firstDebt.to, firstDebt.amount);
+                }
+                await appAlert(
+                    `Đã báo lên Telegram rằng <b>${firstDebt.from}</b> đang nợ <b>${firstDebt.to}</b> ${formatCurrency(firstDebt.amount)}.`,
+                    "Đã báo Telegram",
+                    "📩"
+                );
+            }
+        });
+        return;
+    }
+
+    if(gets.length){
+        const firstGet = gets[0];
+        const popupKey = getDebtPopupKey("creditor", firstGet.from, firstGet.to);
+        if(localStorage.getItem(popupKey)) return;
+        localStorage.setItem(popupKey, "1");
+
+        const pills = gets.map(item => `
+            <span class="debt-pill">💳 ${item.from} nợ bạn ${formatCurrency(item.amount)}</span>
+        `).join("");
+
+        openAppModal({
+            icon: "🏦",
+            title: `Có người đang nợ ${user}`,
+            subtitle: "Thông báo công nợ khi đăng nhập",
+            html: `
+                <div>Hiện có người đang cần thanh toán cho bạn:</div>
+                <div style="margin-top:10px;">${pills}</div>
+                <div style="margin-top:12px; font-size:13px; color:var(--muted);">
+                    Vào bảng thanh toán trong web để theo dõi chi tiết nhé.
+                </div>
+            `,
+            confirmText: "Vào web xem nợ",
+            confirmClass: "modal-btn-success"
+        });
+    }
+}
+
+async function payDebt(from, to, amount){
+    const existedPending = globalPayments.some(p =>
+        p.from === from &&
+        p.to === to &&
+        Number(p.amount) === Number(amount) &&
+        p.status === "pending"
+    );
+
+    if(existedPending){
+        await appAlert("Khoản thanh toán này đang chờ người nhận xác nhận rồi nhé 🌸", "Đang chờ xác nhận", "⏳");
+        return;
+    }
+
+    await db.collection("payments").add({
+        from,
+        to,
+        amount,
+        status: "pending",
+        time: Date.now()
+    });
+
+    sendTelegramPaymentPending(from, to, amount);
+    await appAlert("Đã ghi nhận là bạn đã chuyển tiền. Chờ người nhận xác nhận nhé ✨", "Đã báo chuyển", "✅");
+}
+
+async function confirmPayment(id){
+    const payment = globalPayments.find(p => p.id === id);
+    if(!payment) return;
+
+    await db.collection("payments").doc(id).update({
+        status: "confirmed",
+        confirmedAt: Date.now(),
+        confirmedBy: user
+    });
+
+    sendTelegramPayment(payment.from, payment.to, payment.amount);
+    await appAlert("Đã xác nhận nhận tiền thành công 🎉", "Xác nhận thành công", "💖");
+}
+
+async function deletePaymentRequest(id){
+    const payment = globalPayments.find(p => p.id === id);
+    if(!payment) return;
+
+    const ok = await appConfirm("Xóa yêu cầu thanh toán này?", "Xóa yêu cầu", "🗑️", "Xóa", "Hủy");
+    if(!ok) return;
+
+    await db.collection("payments").doc(id).delete();
+    await appAlert("Đã xóa yêu cầu thanh toán.", "Đã xóa", "✅");
+}
+
+async function purgeOldPayments(){
+    try{
+        const now = Date.now();
+        const snapshot = await db.collection("payments").get();
+
+        const jobs = [];
+        snapshot.forEach(doc => {
+            const data = doc.data() || {};
+            const baseTime = Number(data.confirmedAt || data.time || 0);
+            if(baseTime && now - baseTime >= PAYMENT_EXPIRE_MS){
+                jobs.push(db.collection("payments").doc(doc.id).delete());
+            }
+        });
+
+        if(jobs.length) await Promise.all(jobs);
+    }catch(err){
+        console.log("Không thể dọn payment cũ:", err);
+    }
+}
+
+function renderPayments(){
+    if(globalPayments.length === 0){
+        document.getElementById("paymentList").innerHTML = `<div class="empty-box">Chưa có yêu cầu thanh toán nào 🌸</div>`;
+        return;
+    }
+
+    let html = "";
+
+    globalPayments.forEach(p => {
+        const isReceiver = user === p.to;
+        const isSender = user === p.from;
+        const statusBadge = p.status === "confirmed"
+            ? `<span class="badge badge-confirmed">Đã xác nhận</span>`
+            : `<span class="badge badge-pending">Đang chờ xác nhận</span>`;
+
+        const ageMs = Date.now() - Number(p.confirmedAt || p.time || 0);
+        const remainingDays = Math.max(0, Math.ceil((PAYMENT_EXPIRE_MS - ageMs) / (24 * 60 * 60 * 1000)));
+        const qrUrl = isSender ? generateVietQRForUser(p.to, p.amount, `${p.from} chuyen ${p.to}`) : null;
+
+        html += `
+        <div class="taskBox" style="flex-direction:column; align-items:flex-start;">
+            <div style="width:100%; display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap;">
+                <div>
+                    <div style="font-weight:700; color:var(--secondary); margin-bottom:6px;">
+                        ${p.from} → ${p.to}
+                    </div>
+                    <div>💰 ${formatCurrency(p.amount)}</div>
+                    <div style="font-size:12px; color:var(--muted); margin-top:6px;">🕒 ${formatDateTime(p.time)}</div>
+                    <div style="font-size:12px; color:var(--muted); margin-top:4px;">🧹 Tự xóa sau khoảng: <b>${remainingDays}</b> ngày</div>
+                </div>
+                <div>${statusBadge}</div>
+            </div>
+
+            <div style="font-size:13px; color:var(--muted);">
+                ${p.status === "pending"
+                    ? `Người gửi đã báo chuyển tiền, đang chờ <b>${p.to}</b> xác nhận.`
+                    : `Khoản thanh toán này đã được xác nhận và đã trừ nợ.`
+                }
+            </div>
+
+            <div class="inline-actions">
+                ${isReceiver && p.status === "pending" ? `
+                    <button class="small-btn btn-success" onclick="confirmPayment('${p.id}')">Xác nhận đã nhận</button>
+                ` : ``}
+
+                ${(isSender || isReceiver) && p.status === "pending" ? `
+                    <button class="small-btn btn-danger" onclick="deletePaymentRequest('${p.id}')">Xóa</button>
+                ` : ``}
+
+                ${qrUrl ? `<a href="${qrUrl}" target="_blank" class="social-btn btn-zalo" style="display:inline-block; width:auto; padding:10px 14px;">Mở QR chuyển khoản</a>` : ``}
+            </div>
+        </div>`;
+    });
+
+    document.getElementById("paymentList").innerHTML = html;
+}
+
+function formatDateTime(timestamp){
+    const d = new Date(timestamp);
+    return d.toLocaleTimeString('vi-VN') + ' ' + d.toLocaleDateString('vi-VN');
+}
+
+function getCurrentTimeStr() {
+    let now = new Date();
+    return now.toLocaleTimeString('vi-VN') + ' ' + now.toLocaleDateString('vi-VN');
+}
+
+function sendTelegram(name, job){
+    let time = getCurrentTimeStr();
+    let text = `🌟 <b>NHIỆM VỤ HOÀN THÀNH</b> 🌟\n\n👤 <b>Thành viên:</b> ${name}\n✅ <b>Nhiệm vụ:</b> ${job}\n⏰ <b>Thời gian:</b> ${time}\n\n🔗 <b>Vào app:</b> ${APP_URL}\n\n<i>Cảm ơn bé đã chăm chỉ nhé! 💖</i>`;
+
+    fetch(`https://api.telegram.org/bot${TOKEN}/sendMessage`,{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({ chat_id: CHAT_ID, text: text, parse_mode: "HTML" })
+    });
+}
+
+function sendBillTelegram(food, price, buyer, share){
+    let time = getCurrentTimeStr();
+    let text = `🛍️ <b>HÓA ĐƠN MỚI</b> 🛍️\n\n🛒 <b>Món đồ:</b> ${food}\n💸 <b>Tổng tiền:</b> ${price.toLocaleString()} VNĐ\n💳 <b>Người chi:</b> ${buyer}\n📊 <b>Mỗi người chia:</b> ${share.toLocaleString()} VNĐ\n⏰ <b>Thời gian:</b> ${time}\n\n🔗 <b>Vào app xem chi tiết:</b> ${APP_URL}\n\n<i>Mọi người nhớ check bảng nợ nha! 📝</i>`;
+
+    fetch(`https://api.telegram.org/bot${TOKEN}/sendMessage`,{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({ chat_id: CHAT_ID, text: text, parse_mode: "HTML" })
+    });
+}
+
+function sendTelegramPayment(from, to, amount) {
+    let time = getCurrentTimeStr();
+    let text = `💸 <b>THANH TOÁN NỢ ĐÃ XÁC NHẬN</b> 💸\n\n📤 <b>Người gửi:</b> ${from}\n📥 <b>Người nhận:</b> ${to}\n💰 <b>Số tiền:</b> ${amount.toLocaleString()} VNĐ\n⏰ <b>Thời gian xác nhận:</b> ${time}\n\n🔗 <b>Vào app:</b> ${APP_URL}\n\n<i>Nợ nần đã được thanh toán sòng phẳng! 🎉</i>`;
+
+    fetch(`https://api.telegram.org/bot${TOKEN}/sendMessage`,{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({ chat_id: CHAT_ID, text: text, parse_mode: "HTML" })
+    });
+}
+
+function sendTelegramPaymentPending(from, to, amount) {
+    let time = getCurrentTimeStr();
+    let text = `💳 <b>YÊU CẦU XÁC NHẬN THANH TOÁN</b> 💳\n\n📤 <b>Người gửi:</b> ${from}\n📥 <b>Người nhận:</b> ${to}\n💰 <b>Số tiền:</b> ${amount.toLocaleString()} VNĐ\n⏰ <b>Thời gian báo chuyển:</b> ${time}\n\n🔗 <b>Nhớ vào app để xác nhận:</b> ${APP_URL}\n\n<i>Người nhận nhớ vào app bấm xác nhận đã nhận tiền nhé! ✨</i>`;
+
+    fetch(`https://api.telegram.org/bot${TOKEN}/sendMessage`,{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({ chat_id: CHAT_ID, text: text, parse_mode: "HTML" })
+    });
+}
+
+function sendTelegramReminder(name, job) {
+    let time = getCurrentTimeStr();
+    let text = `📢 <b>NHẮC NHỞ NHIỆM VỤ</b> 📢\n\n⚠️ <b>${name}</b> ơi, bé vẫn chưa làm nhiệm vụ: <b>${job}</b> kìa!\n⏰ <b>Thời gian nhắc:</b> ${time}\n\n🔗 <b>Nhớ vào app làm nhiệm vụ:</b> ${APP_URL}\n\n<i>Làm nhanh cho xong rảnh rang đi chơi nào! 🚀</i>`;
+
+    fetch(`https://api.telegram.org/bot${TOKEN}/sendMessage`,{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({ chat_id: CHAT_ID, text: text, parse_mode: "HTML" })
+    });
+}
+
+function sendTelegramEmergency(name, issue){
+    let time = getCurrentTimeStr();
+    let text = `🚨 <b>SOS KHẨN CẤP</b> 🚨\n\n👤 <b>Người báo:</b> ${name}\n⚠️ <b>Sự cố:</b> ${issue}\n⏰ <b>Thời gian:</b> ${time}\n\n🔗 <b>Vào app:</b> ${APP_URL}\n\n<i>Mọi người kiểm tra ngay giúp nhé!</i>`;
+
+    fetch(`https://api.telegram.org/bot${TOKEN}/sendMessage`,{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({ chat_id: CHAT_ID, text: text, parse_mode: "HTML" })
+    });
+}
+
+function sendTelegramDebtNotice(from, to, amount){
+    let time = getCurrentTimeStr();
+    let text = `📌 <b>THÔNG BÁO CÔNG NỢ</b> 📌\n\n💸 <b>${from}</b> hiện đang nợ <b>${to}</b>\n💰 <b>Số tiền:</b> ${amount.toLocaleString()} VNĐ\n⏰ <b>Thời gian nhắc:</b> ${time}\n\n🔗 <b>Vào app để xử lý:</b> ${APP_URL}\n\n<i>Bé nhớ thanh toán sớm cho gọn sổ nha ✨</i>`;
+
+    fetch(`https://api.telegram.org/bot${TOKEN}/sendMessage`,{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({ chat_id: CHAT_ID, text: text, parse_mode: "HTML" })
+    });
+}
+
+async function triggerEmergency(){
+    if(!user){
+        await appAlert("Chọn thành viên trước nhé.", "Chưa chọn người dùng", "👤");
+        return;
+    }
+
+    const issue = await appPrompt(
+        "Nhập sự cố khẩn cấp bên dưới nhé 🚨<br>Ví dụ: Vỡ đường ống nước / Mất điện / Mất chìa khóa",
+        "",
+        "Mô tả sự cố khẩn cấp",
+        "SOS khẩn cấp",
+        "🚨"
+    );
+    if(issue === null) return;
+
+    const cleanIssue = issue.trim();
+    if(!cleanIssue){
+        await appAlert("Nhập nội dung sự cố trước nhé.", "Thiếu nội dung", "⚠️");
+        return;
+    }
+
+    const audio = document.getElementById("sosSound");
+    audio.currentTime = 0;
+    audio.play().catch(err => console.log("Không phát được âm thanh SOS:", err));
+
+    sendTelegramEmergency(user, cleanIssue);
+    await appAlert("Đã gửi cảnh báo SOS tới nhóm Telegram 🚨", "Đã gửi cảnh báo", "✅");
+}
+
+function applyNightModeState(enabled){
+    document.body.classList.toggle("night-mode", enabled);
+    localStorage.setItem("nightModeEnabled", enabled ? "1" : "0");
+}
+
+function toggleNightMode(){
+    const enabled = !document.body.classList.contains("night-mode");
+    applyNightModeState(enabled);
+}
+
+function autoNightModeByTime(){
+    const saved = localStorage.getItem("nightModeEnabled");
+    if(saved === "1" || saved === "0"){
+        applyNightModeState(saved === "1");
+        return;
+    }
+
+    const hour = new Date().getHours();
+    const autoEnable = (hour >= 22 || hour < 6);
+    applyNightModeState(autoEnable);
+}
+
+window.onload = () => {
+    autoNightModeByTime();
+};
+
+setInterval(() => {
+    if(user) purgeOldPayments();
+}, 60 * 60 * 1000);
+</script>
+
+</body>
+</html>
